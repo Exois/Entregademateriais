@@ -302,65 +302,80 @@
       document.getElementById("codigo").focus();
     }
 
-    // -------- Código para escanear código de barras pela câmera ----------
+<!-- -------- Código para escanear código de barras pela câmera ---------- -->
+<script>
+  const btnScan = document.getElementById("btnScan");
+  const scannerDiv = document.getElementById("scanner");
 
-    const btnScan = document.getElementById("btnScan");
-    const scannerDiv = document.getElementById("scanner");
+  let scanner;
 
-    let scanner; // html5-qrcode scanner instância
+  btnScan.addEventListener("click", () => {
+    if (scannerDiv.style.display === "none" || scannerDiv.style.display === "") {
+      iniciarScanner();
+    } else {
+      pararScanner();
+    }
+  });
 
-    btnScan.addEventListener("click", () => {
-      if (scannerDiv.style.display === "none" || scannerDiv.style.display === "") {
-        iniciarScanner();
-      } else {
-        pararScanner();
-      }
-    });
+  function iniciarScanner() {
+    scannerDiv.style.display = "block";
+    btnScan.textContent = "❌";
 
-    function iniciarScanner() {
-      scannerDiv.style.display = "block";
-      btnScan.textContent = "❌";
+    if (!scanner) {
+      scanner = new Html5Qrcode("scanner");
+    }
 
-      if (!scanner) {
-        scanner = new Html5Qrcode("scanner");
-      }
+    Html5Qrcode.getCameras()
+      .then(cameras => {
+        if (cameras && cameras.length) {
+          const backCamera = cameras.find(cam =>
+            cam.label.toLowerCase().includes("back") || cam.label.toLowerCase().includes("traseira")
+          );
+          const cameraId = backCamera ? backCamera.id : cameras[0].id;
 
-      scanner.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 100 },
-          formatsToSupport: [
-            // formatos comuns de código de barras:
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E,
-            Html5QrcodeSupportedFormats.CODE_39,
-          ]
-        },
-        (decodedText, decodedResult) => {
-          // Lido o código com sucesso
-          document.getElementById("codigo").value = decodedText;
-          buscarDescricao();
+          scanner.start(
+            cameraId,
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 100 },
+              formatsToSupport: [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.CODE_39,
+              ]
+            },
+            (decodedText, decodedResult) => {
+              document.getElementById("codigo").value = decodedText;
+              buscarDescricao();
+              pararScanner();
+            },
+            (errorMessage) => {
+              // Ignorar erros contínuos de leitura
+            }
+          ).catch(err => {
+            alert("Erro ao abrir câmera: " + err);
+            pararScanner();
+          });
+        } else {
+          alert("Nenhuma câmera foi detectada.");
           pararScanner();
-        },
-        (errorMessage) => {
-          // console.log("Scan error", errorMessage);
         }
-      ).catch(err => {
-        alert("Erro ao abrir câmera: " + err);
+      })
+      .catch(err => {
+        alert("Erro ao obter câmeras: " + err);
         pararScanner();
       });
-    }
+  }
 
-    function pararScanner() {
-      btnScan.textContent = "📷";
-      scannerDiv.style.display = "none";
-      if (scanner) {
-        scanner.stop().catch(() => {});
-      }
+  function pararScanner() {
+    btnScan.textContent = "📷";
+    scannerDiv.style.display = "none";
+    if (scanner) {
+      scanner.stop().catch(() => {});
     }
-  </script>
+  }
+</script>
 </body>
 </html>
