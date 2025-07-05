@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entrega de Materiais</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entrega de Materiais - Código de Barras</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -13,14 +13,13 @@
     }
     h1 {
       text-align: center;
-      color: #333;
       margin-bottom: 20px;
+      color: #333;
     }
     label {
       font-weight: bold;
-      display: block;
       margin-top: 10px;
-      margin-bottom: 5px;
+      display: block;
     }
     input[type="text"], input[type="number"] {
       width: 100%;
@@ -33,9 +32,26 @@
       display: flex;
       gap: 5px;
       margin-bottom: 10px;
+      align-items: center;
     }
     .linha input {
       flex: 1;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 18px;
+    }
+    #btnScan {
+      background-color: #4caf50;
+      color: white;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .quantidade-control {
       display: flex;
@@ -47,20 +63,15 @@
       width: 30px;
       height: 30px;
       font-size: 20px;
-      border-radius: 5px;
-      border: none;
       background-color: #eee;
     }
     .btn-principal {
-      background-color: #4CAF50;
+      background-color: #4caf50;
       color: white;
       font-size: 16px;
       padding: 12px;
       width: 100%;
-      border: none;
-      border-radius: 5px;
       margin-top: 10px;
-      cursor: pointer;
     }
     .carrinho {
       margin-top: 20px;
@@ -68,30 +79,34 @@
       padding-top: 10px;
     }
     .carrinho-item {
-      background: #fff;
+      background: white;
       padding: 10px;
-      margin-bottom: 8px;
-      border: 1px solid #ddd;
       border-radius: 5px;
+      border: 1px solid #ddd;
+      margin-bottom: 8px;
       position: relative;
     }
-    .carrinho-item .acoes {
+    .acoes {
       position: absolute;
-      top: 10px;
       right: 10px;
+      top: 10px;
       display: flex;
       gap: 5px;
     }
-    .carrinho-item button {
-      background: #2196F3;
+    .acoes button {
+      background-color: #2196f3;
       color: white;
-      border: none;
-      border-radius: 5px;
       padding: 5px 10px;
-      cursor: pointer;
+      font-size: 16px;
     }
-    .carrinho-item .excluir {
-      background: #f44336;
+    .acoes button.excluir {
+      background-color: #f44336;
+    }
+    #scanner {
+      width: 100%;
+      max-width: 400px;
+      margin: 10px auto;
+      display: none;
     }
   </style>
 </head>
@@ -100,31 +115,33 @@
   <h1>Entrega de Materiais</h1>
 
   <!-- Campos fixos no topo -->
-  <label>Transação (3 caracteres):</label>
-  <input type="text" maxlength="3" id="transacao">
+  <label for="transacao">Transação (3 caracteres):</label>
+  <input type="text" id="transacao" maxlength="3" />
 
-  <label>Centro de Custo (6 caracteres):</label>
-  <input type="text" maxlength="6" id="centro">
+  <label for="centro">Centro de Custo (6 caracteres):</label>
+  <input type="text" id="centro" maxlength="6" />
 
-  <label>Solicitante:</label>
-  <input type="text" id="solicitante">
+  <label for="solicitante">Solicitante:</label>
+  <input type="text" id="solicitante" />
 
-  <label>Responsável pelo Atendimento:</label>
-  <input type="text" id="responsavel">
+  <label for="responsavel">Responsável pelo Atendimento:</label>
+  <input type="text" id="responsavel" />
 
-  <label>Código de barras ou manual:</label>
+  <!-- Código e descrição -->
+  <label for="codigo">Código de barras ou manual:</label>
   <div class="linha">
-    <input type="text" id="codigo" placeholder="Código de barras" onblur="buscarDescricao()">
-    <button disabled>📷</button>
+    <input type="text" id="codigo" placeholder="Digite ou escaneie o código" autocomplete="off" />
+    <button id="btnScan" title="Abrir câmera para escanear">📷</button>
   </div>
 
-  <label>Descrição:</label>
-  <input type="text" id="descricao" placeholder="Descrição do produto" readonly>
+  <label for="descricao">Descrição:</label>
+  <input type="text" id="descricao" readonly placeholder="Descrição do produto aparecerá aqui" />
 
+  <!-- Quantidade -->
   <label>Quantidade:</label>
   <div class="quantidade-control">
     <button onclick="alterarQuantidade(-1)">−</button>
-    <input type="number" id="quantidade" value="1" min="1">
+    <input type="number" id="quantidade" value="1" min="1" />
     <button onclick="alterarQuantidade(1)">+</button>
   </div>
 
@@ -136,30 +153,52 @@
 
   <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
 
+  <!-- Scanner container -->
+  <div id="scanner"></div>
+
+  <!-- Importa a biblioteca html5-qrcode -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
 
     let carrinho = [];
     let editandoIndex = -1;
 
-    function alterarQuantidade(valor) {
+    function alterarQuantidade(delta) {
       const campo = document.getElementById("quantidade");
-      let atual = parseInt(campo.value) || 1;
-      campo.value = Math.max(1, atual + valor);
+      let val = parseInt(campo.value) || 1;
+      val = Math.max(1, val + delta);
+      campo.value = val;
     }
 
     async function buscarDescricao() {
       const codigo = document.getElementById("codigo").value.trim();
-      if (!codigo) return;
+      if (!codigo) {
+        document.getElementById("descricao").value = "";
+        return;
+      }
+
+      document.getElementById("descricao").value = "Buscando...";
+
       try {
-        const res = await fetch(`${API_URL}?codigo=${codigo}`);
-        const json = await res.json();
-        document.getElementById("descricao").value = json.descricao || "Produto não encontrado";
-      } catch {
+        const res = await fetch(`${API_URL}?codigo=${encodeURIComponent(codigo)}`);
+        const data = await res.json();
+
+        if (data.descricao) {
+          document.getElementById("descricao").value = data.descricao;
+        } else {
+          document.getElementById("descricao").value = "Produto não encontrado";
+        }
+      } catch (e) {
         document.getElementById("descricao").value = "Erro na busca";
       }
     }
 
+    // Evento para buscar descrição ao sair do campo codigo
+    document.getElementById("codigo").addEventListener("blur", buscarDescricao);
+
+    // Adiciona item no carrinho
     function adicionarItem() {
       const codigo = document.getElementById("codigo").value.trim();
       const descricao = document.getElementById("descricao").value.trim();
@@ -169,18 +208,18 @@
       const solicitante = document.getElementById("solicitante").value.trim();
       const responsavel = document.getElementById("responsavel").value.trim();
 
-      if (!codigo || !descricao || descricao === "Produto não encontrado" || !quantidade) {
+      if (!codigo || !descricao || descricao === "Produto não encontrado" || !quantidade || quantidade < 1) {
         alert("Preencha corretamente os dados do item.");
         return;
       }
 
-      const novoItem = { codigo, descricao, quantidade, transacao, centro, solicitante, responsavel };
+      const item = { codigo, descricao, quantidade, transacao, centro, solicitante, responsavel };
 
       if (editandoIndex >= 0) {
-        carrinho[editandoIndex] = novoItem;
+        carrinho[editandoIndex] = item;
         editandoIndex = -1;
       } else {
-        carrinho.push(novoItem);
+        carrinho.push(item);
       }
 
       limparCamposItem();
@@ -188,25 +227,29 @@
       renderizarCarrinho();
     }
 
+    // Limpa os campos do item (codigo, descrição, quantidade)
     function limparCamposItem() {
       document.getElementById("codigo").value = "";
       document.getElementById("descricao").value = "";
       document.getElementById("quantidade").value = 1;
+      document.getElementById("codigo").focus();
     }
 
+    // Copia os valores do último item para os campos fixos para facilitar novas entradas
     function preencherCamposPadrao() {
-      if (carrinho.length > 0) {
-        const ultimo = carrinho[carrinho.length - 1];
-        document.getElementById("transacao").value = ultimo.transacao;
-        document.getElementById("centro").value = ultimo.centro;
-        document.getElementById("solicitante").value = ultimo.solicitante;
-        document.getElementById("responsavel").value = ultimo.responsavel;
-      }
+      if (carrinho.length === 0) return;
+      const ultimo = carrinho[carrinho.length - 1];
+      document.getElementById("transacao").value = ultimo.transacao || "";
+      document.getElementById("centro").value = ultimo.centro || "";
+      document.getElementById("solicitante").value = ultimo.solicitante || "";
+      document.getElementById("responsavel").value = ultimo.responsavel || "";
     }
 
+    // Renderiza a lista de itens no carrinho, com botões editar e excluir
     function renderizarCarrinho() {
       const div = document.getElementById("carrinho");
       div.innerHTML = "<h3>Itens adicionados:</h3>";
+
       carrinho.forEach((item, i) => {
         const el = document.createElement("div");
         el.className = "carrinho-item";
@@ -222,6 +265,7 @@
       });
     }
 
+    // Editar item: confirma, preenche os campos para editar
     function editarItem(i) {
       if (!confirm("Deseja editar este item?")) return;
       const item = carrinho[i];
@@ -236,21 +280,86 @@
       document.getElementById("codigo").focus();
     }
 
+    // Excluir item: confirma e remove do array
     function excluirItem(i) {
       if (!confirm("Deseja realmente excluir este item?")) return;
       carrinho.splice(i, 1);
       renderizarCarrinho();
     }
 
+    // Finalizar entrega: só limpa tudo e alerta
     function finalizarEntrega() {
       if (carrinho.length === 0) {
-        alert("Adicione pelo menos um item.");
+        alert("Adicione pelo menos um item antes de finalizar.");
         return;
       }
       alert("Entrega finalizada!");
       carrinho = [];
       renderizarCarrinho();
-      document.querySelectorAll("input").forEach(el => el.value = "");
+      // Limpar todos os campos
+      document.querySelectorAll("input").forEach(i => i.value = "");
+      editandoIndex = -1;
+      document.getElementById("codigo").focus();
+    }
+
+    // -------- Código para escanear código de barras pela câmera ----------
+
+    const btnScan = document.getElementById("btnScan");
+    const scannerDiv = document.getElementById("scanner");
+
+    let scanner; // html5-qrcode scanner instância
+
+    btnScan.addEventListener("click", () => {
+      if (scannerDiv.style.display === "none" || scannerDiv.style.display === "") {
+        iniciarScanner();
+      } else {
+        pararScanner();
+      }
+    });
+
+    function iniciarScanner() {
+      scannerDiv.style.display = "block";
+      btnScan.textContent = "❌";
+
+      if (!scanner) {
+        scanner = new Html5Qrcode("scanner");
+      }
+
+      scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 100 },
+          formatsToSupport: [
+            // formatos comuns de código de barras:
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.CODE_39,
+          ]
+        },
+        (decodedText, decodedResult) => {
+          // Lido o código com sucesso
+          document.getElementById("codigo").value = decodedText;
+          buscarDescricao();
+          pararScanner();
+        },
+        (errorMessage) => {
+          // console.log("Scan error", errorMessage);
+        }
+      ).catch(err => {
+        alert("Erro ao abrir câmera: " + err);
+        pararScanner();
+      });
+    }
+
+    function pararScanner() {
+      btnScan.textContent = "📷";
+      scannerDiv.style.display = "none";
+      if (scanner) {
+        scanner.stop().catch(() => {});
+      }
     }
   </script>
 </body>
