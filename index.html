@@ -277,7 +277,11 @@
 
       Html5Qrcode.getCameras().then(cameras => {
         if (cameras && cameras.length) {
-          const camId = cameras[0].id;
+         const backCam = cameras.find(cam =>
+  cam.label.toLowerCase().includes("back") || cam.label.toLowerCase().includes("traseira")
+);
+const camId = backCam ? backCam.id : cameras[0].id;
+
           scanner.start(
             camId,
             { fps: 10, qrbox: { width: 250, height: 100 } },
