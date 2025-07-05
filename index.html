@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Entrega de Materiais - Código de Barras</title>
+  <title>Entrega de Materiais</title>
+  <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      margin: 10px;
+      margin: 15px;
       background: #f9f9f9;
     }
     h1 {
       text-align: center;
       margin-bottom: 20px;
-      color: #333;
     }
     label {
       font-weight: bold;
-      margin-top: 10px;
       display: block;
+      margin-top: 10px;
     }
     input[type="text"], input[type="number"] {
       width: 100%;
@@ -31,27 +31,20 @@
     .linha {
       display: flex;
       gap: 5px;
-      margin-bottom: 10px;
+      margin-top: 5px;
       align-items: center;
     }
     .linha input {
       flex: 1;
     }
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      padding: 10px;
-      font-size: 18px;
-    }
-    #btnScan {
-      background-color: #4caf50;
-      color: white;
+    .linha button {
       width: 50px;
       height: 50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      font-size: 22px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
     }
     .quantidade-control {
       display: flex;
@@ -72,6 +65,8 @@
       padding: 12px;
       width: 100%;
       margin-top: 10px;
+      border: none;
+      border-radius: 5px;
     }
     .carrinho {
       margin-top: 20px;
@@ -102,46 +97,39 @@
     .acoes button.excluir {
       background-color: #f44336;
     }
-    #scanner {
-      width: 100%;
-      max-width: 400px;
-      margin: 10px auto;
-      display: none;
-    }
   </style>
 </head>
 <body>
 
   <h1>Entrega de Materiais</h1>
 
-  <!-- Campos fixos no topo -->
-  <label for="transacao">Transação (3 caracteres):</label>
+  <label>Transação (3 caracteres):</label>
   <input type="text" id="transacao" maxlength="3" />
 
-  <label for="centro">Centro de Custo (6 caracteres):</label>
+  <label>Centro de Custo (6 caracteres):</label>
   <input type="text" id="centro" maxlength="6" />
 
-  <label for="solicitante">Solicitante:</label>
+  <label>Solicitante:</label>
   <input type="text" id="solicitante" />
 
-  <label for="responsavel">Responsável pelo Atendimento:</label>
+  <label>Responsável pelo Atendimento:</label>
   <input type="text" id="responsavel" />
 
-  <!-- Código e descrição -->
-  <label for="codigo">Código de barras ou manual:</label>
+  <!-- Código + câmera -->
+  <label>Código de barras ou manual:</label>
   <div class="linha">
-    <input type="text" id="codigo" placeholder="Digite ou escaneie o código" autocomplete="off" />
-    <button id="btnScan" title="Abrir câmera para escanear">📷</button>
+    <input type="text" id="codigo" placeholder="Digite ou escaneie o código" autocomplete="off">
+    <button onclick="document.getElementById('fotoInput').click()">📷</button>
   </div>
+  <input type="file" accept="image/*" capture="environment" id="fotoInput" style="display: none;" />
 
-  <label for="descricao">Descrição:</label>
+  <label>Descrição:</label>
   <input type="text" id="descricao" readonly placeholder="Descrição do produto aparecerá aqui" />
 
-  <!-- Quantidade -->
   <label>Quantidade:</label>
   <div class="quantidade-control">
     <button onclick="alterarQuantidade(-1)">−</button>
-    <input type="number" id="quantidade" value="1" min="1" />
+    <input type="number" id="quantidade" value="1" min="1">
     <button onclick="alterarQuantidade(1)">+</button>
   </div>
 
@@ -153,52 +141,32 @@
 
   <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
 
-  <!-- Scanner container -->
-  <div id="scanner"></div>
-
-  <!-- Importa a biblioteca html5-qrcode -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
-
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
-
     let carrinho = [];
     let editandoIndex = -1;
 
-    function alterarQuantidade(delta) {
+    function alterarQuantidade(valor) {
       const campo = document.getElementById("quantidade");
-      let val = parseInt(campo.value) || 1;
-      val = Math.max(1, val + delta);
-      campo.value = val;
+      let atual = parseInt(campo.value) || 1;
+      campo.value = Math.max(1, atual + valor);
     }
 
     async function buscarDescricao() {
       const codigo = document.getElementById("codigo").value.trim();
-      if (!codigo) {
-        document.getElementById("descricao").value = "";
-        return;
-      }
-
+      if (!codigo) return;
       document.getElementById("descricao").value = "Buscando...";
-
       try {
         const res = await fetch(`${API_URL}?codigo=${encodeURIComponent(codigo)}`);
-        const data = await res.json();
-
-        if (data.descricao) {
-          document.getElementById("descricao").value = data.descricao;
-        } else {
-          document.getElementById("descricao").value = "Produto não encontrado";
-        }
+        const json = await res.json();
+        document.getElementById("descricao").value = json.descricao || "Produto não encontrado";
       } catch (e) {
         document.getElementById("descricao").value = "Erro na busca";
       }
     }
 
-    // Evento para buscar descrição ao sair do campo codigo
     document.getElementById("codigo").addEventListener("blur", buscarDescricao);
 
-    // Adiciona item no carrinho
     function adicionarItem() {
       const codigo = document.getElementById("codigo").value.trim();
       const descricao = document.getElementById("descricao").value.trim();
@@ -227,7 +195,6 @@
       renderizarCarrinho();
     }
 
-    // Limpa os campos do item (codigo, descrição, quantidade)
     function limparCamposItem() {
       document.getElementById("codigo").value = "";
       document.getElementById("descricao").value = "";
@@ -235,21 +202,18 @@
       document.getElementById("codigo").focus();
     }
 
-    // Copia os valores do último item para os campos fixos para facilitar novas entradas
     function preencherCamposPadrao() {
       if (carrinho.length === 0) return;
       const ultimo = carrinho[carrinho.length - 1];
-      document.getElementById("transacao").value = ultimo.transacao || "";
-      document.getElementById("centro").value = ultimo.centro || "";
-      document.getElementById("solicitante").value = ultimo.solicitante || "";
-      document.getElementById("responsavel").value = ultimo.responsavel || "";
+      document.getElementById("transacao").value = ultimo.transacao;
+      document.getElementById("centro").value = ultimo.centro;
+      document.getElementById("solicitante").value = ultimo.solicitante;
+      document.getElementById("responsavel").value = ultimo.responsavel;
     }
 
-    // Renderiza a lista de itens no carrinho, com botões editar e excluir
     function renderizarCarrinho() {
       const div = document.getElementById("carrinho");
       div.innerHTML = "<h3>Itens adicionados:</h3>";
-
       carrinho.forEach((item, i) => {
         const el = document.createElement("div");
         el.className = "carrinho-item";
@@ -265,7 +229,6 @@
       });
     }
 
-    // Editar item: confirma, preenche os campos para editar
     function editarItem(i) {
       if (!confirm("Deseja editar este item?")) return;
       const item = carrinho[i];
@@ -280,14 +243,12 @@
       document.getElementById("codigo").focus();
     }
 
-    // Excluir item: confirma e remove do array
     function excluirItem(i) {
       if (!confirm("Deseja realmente excluir este item?")) return;
       carrinho.splice(i, 1);
       renderizarCarrinho();
     }
 
-    // Finalizar entrega: só limpa tudo e alerta
     function finalizarEntrega() {
       if (carrinho.length === 0) {
         alert("Adicione pelo menos um item antes de finalizar.");
@@ -296,46 +257,36 @@
       alert("Entrega finalizada!");
       carrinho = [];
       renderizarCarrinho();
-      // Limpar todos os campos
       document.querySelectorAll("input").forEach(i => i.value = "");
       editandoIndex = -1;
       document.getElementById("codigo").focus();
     }
 
-<input type="file" accept="image/*" capture="environment" id="fotoInput">
+    // Leitura por imagem
+    const inputFoto = document.getElementById('fotoInput');
+    inputFoto.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        Quagga.decodeSingle({
+          src: dataUrl,
+          numOfWorkers: 0,
+          inputStream: { size: 800 },
+          decoder: { readers: ["ean_reader", "code_128_reader", "code_39_reader"] }
+        }, (result) => {
+          if (result && result.codeResult) {
+            document.getElementById("codigo").value = result.codeResult.code;
+            buscarDescricao();
+          } else {
+            alert("Não foi possível ler o código.");
+          }
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
 
-<script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
-<script>
-  const inputFoto = document.getElementById('fotoInput');
-
-  inputFoto.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function() {
-      const dataUrl = reader.result;
-
-      Quagga.decodeSingle({
-        src: dataUrl,
-        numOfWorkers: 0,
-        inputStream: {
-          size: 800  // ajustar conforme necessidade
-        },
-        decoder: {
-          readers: ["ean_reader", "code_128_reader", "code_39_reader"]
-        }
-      }, function(result) {
-        if(result && result.codeResult) {
-          alert("Código lido: " + result.codeResult.code);
-          // aqui você pode preencher o input codigo e buscar descrição
-        } else {
-          alert("Não foi possível ler o código da imagem.");
-        }
-      });
-    };
-    reader.readAsDataURL(file);
-  });
-</script>
 </body>
 </html>
