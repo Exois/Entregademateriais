@@ -307,7 +307,7 @@
   const btnScan = document.getElementById("btnScan");
   const scannerDiv = document.getElementById("scanner");
 
-  let scanner;
+  let scanner = null;
 
   btnScan.addEventListener("click", () => {
     if (scannerDiv.style.display === "none" || scannerDiv.style.display === "") {
@@ -328,6 +328,7 @@
     Html5Qrcode.getCameras()
       .then(cameras => {
         if (cameras && cameras.length) {
+          // Tenta selecionar a câmera traseira
           const backCamera = cameras.find(cam =>
             cam.label.toLowerCase().includes("back") || cam.label.toLowerCase().includes("traseira")
           );
