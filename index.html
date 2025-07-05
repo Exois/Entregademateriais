@@ -12,10 +12,7 @@
       margin: 15px;
       background: #f9f9f9;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 15px;
-    }
+    h1 { text-align: center; margin-bottom: 15px; }
     .tabs {
       display: flex;
       justify-content: center;
@@ -29,18 +26,13 @@
       border: none;
       border-radius: 5px;
       background: #ddd;
-      transition: background-color 0.3s;
     }
     .tabs button.active {
       background: #4caf50;
       color: white;
     }
-    .aba {
-      display: none;
-    }
-    .aba.active {
-      display: block;
-    }
+    .aba { display: none; }
+    .aba.active { display: block; }
     label {
       font-weight: bold;
       display: block;
@@ -59,9 +51,7 @@
       margin-top: 5px;
       align-items: center;
     }
-    .linha input {
-      flex: 1;
-    }
+    .linha input { flex: 1; }
     .linha button {
       width: 50px;
       height: 50px;
@@ -125,7 +115,6 @@
       font-size: 16px;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
     }
     .acoes button.excluir {
       background-color: #f44336;
@@ -161,20 +150,19 @@
 
     <label>Código de barras ou manual:</label>
     <div class="linha">
-      <input type="text" id="codigo" placeholder="Digite ou escaneie o código" autocomplete="off" />
-      <button onclick="iniciarScanner()">📷</button>
+      <input type="text" id="codigo" autocomplete="off" />
+      <button onclick="iniciarScanner('codigo', 'leitor-camera')">📷</button>
     </div>
-
     <div id="leitor-camera"></div>
 
     <label>Descrição:</label>
-    <input type="text" id="descricao" readonly placeholder="Descrição do produto aparecerá aqui" />
+    <input type="text" id="descricao" readonly />
 
     <label>Quantidade:</label>
     <div class="quantidade-control">
-      <button onclick="alterarQuantidade(-1)">−</button>
+      <button onclick="alterarQuantidade('quantidade', -1)">−</button>
       <input type="number" id="quantidade" value="1" min="1" />
-      <button onclick="alterarQuantidade(1)">+</button>
+      <button onclick="alterarQuantidade('quantidade', 1)">+</button>
     </div>
 
     <button class="btn-principal" onclick="adicionarItem()">Adicionar ao carrinho</button>
@@ -202,111 +190,89 @@
 
     <label>Código de barras ou manual:</label>
     <div class="linha">
-      <input type="text" id="codigoTransf" placeholder="Digite ou escaneie o código" autocomplete="off" />
-      <button onclick="iniciarScannerTransferencia()">📷</button>
+      <input type="text" id="codigoTransf" autocomplete="off" />
+      <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
     </div>
-
     <div id="leitor-camera-transferencia"></div>
 
     <label>Descrição:</label>
-    <input type="text" id="descricaoTransf" readonly placeholder="Descrição do produto aparecerá aqui" />
+    <input type="text" id="descricaoTransf" readonly />
 
     <label>Quantidade:</label>
     <div class="quantidade-control">
-      <button onclick="alterarQuantidadeTransf(-1)">−</button>
+      <button onclick="alterarQuantidade('quantidadeTransf', -1)">−</button>
       <input type="number" id="quantidadeTransf" value="1" min="1" />
-      <button onclick="alterarQuantidadeTransf(1)">+</button>
+      <button onclick="alterarQuantidade('quantidadeTransf', 1)">+</button>
     </div>
 
     <button class="btn-principal" onclick="registrarTransferencia()">Registrar Transferência</button>
   </div>
 
   <script>
-    // Troca de abas
-    function mostrarAba(qual) {
-      document.querySelectorAll('.aba').forEach(div => div.classList.remove('active'));
-      document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+    let carrinho = [];
 
-      document.getElementById('aba-' + qual).classList.add('active');
-      document.getElementById('btn-' + qual).classList.add('active');
+    function mostrarAba(qual) {
+      document.querySelectorAll(".aba").forEach(div => div.classList.remove("active"));
+      document.querySelectorAll(".tabs button").forEach(btn => btn.classList.remove("active"));
+      document.getElementById("aba-" + qual).classList.add("active");
+      document.getElementById("btn-" + qual).classList.add("active");
     }
 
-    // Variáveis para Uso Consumo
-    const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
-    let carrinho = [];
-    let editandoIndex = -1;
-    let scanner = null;
-
-    // Controle quantidade Uso Consumo
-    function alterarQuantidade(valor) {
-      const campo = document.getElementById("quantidade");
+    function alterarQuantidade(id, valor) {
+      const campo = document.getElementById(id);
       let atual = parseInt(campo.value) || 1;
       campo.value = Math.max(1, atual + valor);
     }
 
-    // Busca descrição pelo código no Uso Consumo
-    async function buscarDescricao() {
-      const codigo = document.getElementById("codigo").value.trim();
-      if (!codigo) return;
-      document.getElementById("descricao").value = "Buscando...";
-      try {
-        const res = await fetch(`${API_URL}?codigo=${encodeURIComponent(codigo)}`);
-        const json = await res.json();
-        document.getElementById("descricao").value = json.descricao || "Produto não encontrado";
-      } catch {
-        document.getElementById("descricao").value = "Erro na busca";
-      }
-    }
-    document.getElementById("codigo").addEventListener("blur", buscarDescricao);
+    function iniciarScanner(inputId, divId) {
+      const div = document.getElementById(divId);
+      div.style.display = "block";
+      const scanner = new Html5Qrcode(divId);
 
-    // Adicionar item ao carrinho
+      Html5Qrcode.getCameras().then(cameras => {
+        if (cameras.length) {
+          const traseira = cameras.find(cam =>
+            cam.label.toLowerCase().includes("back") ||
+            cam.label.toLowerCase().includes("traseira")
+          );
+          const camId = traseira ? traseira.id : cameras[0].id;
+
+          scanner.start(
+            camId,
+            { fps: 10, qrbox: { width: 250, height: 100 } },
+            (codigoLido) => {
+              document.getElementById(inputId).value = codigoLido;
+              scanner.stop().then(() => {
+                div.innerHTML = "";
+                div.style.display = "none";
+              });
+            }
+          ).catch(() => {
+            alert("Erro ao acessar a câmera");
+          });
+        } else {
+          alert("Nenhuma câmera disponível");
+        }
+      });
+    }
+
     function adicionarItem() {
-      const codigo = document.getElementById("codigo").value.trim();
-      const descricao = document.getElementById("descricao").value.trim();
-      const quantidade = parseInt(document.getElementById("quantidade").value);
-      const transacao = document.getElementById("transacao").value.trim();
-      const centro = document.getElementById("centro").value.trim();
-      const solicitante = document.getElementById("solicitante").value.trim();
-      const responsavel = document.getElementById("responsavel").value.trim();
-
-      if (!codigo || !descricao || descricao === "Produto não encontrado" || !quantidade || quantidade < 1) {
-        alert("Preencha corretamente os dados do item.");
-        return;
-      }
-
-      const item = { codigo, descricao, quantidade, transacao, centro, solicitante, responsavel };
-
-      if (editandoIndex >= 0) {
-        carrinho[editandoIndex] = item;
-        editandoIndex = -1;
-      } else {
-        carrinho.push(item);
-      }
-
-      limparCamposItem();
-      preencherCamposPadrao();
+      const item = {
+        codigo: document.getElementById("codigo").value,
+        descricao: document.getElementById("descricao").value,
+        quantidade: document.getElementById("quantidade").value,
+        transacao: document.getElementById("transacao").value,
+        centro: document.getElementById("centro").value,
+        solicitante: document.getElementById("solicitante").value,
+        responsavel: document.getElementById("responsavel").value
+      };
+      carrinho.push(item);
       renderizarCarrinho();
-    }
-
-    // Limpar campos do item
-    function limparCamposItem() {
       document.getElementById("codigo").value = "";
       document.getElementById("descricao").value = "";
       document.getElementById("quantidade").value = 1;
-      document.getElementById("codigo").focus();
     }
 
-    // Preencher campos padrão após adicionar
-    function preencherCamposPadrao() {
-      if (carrinho.length === 0) return;
-      const ultimo = carrinho[carrinho.length - 1];
-      document.getElementById("transacao").value = ultimo.transacao;
-      document.getElementById("centro").value = ultimo.centro;
-      document.getElementById("solicitante").value = ultimo.solicitante;
-      document.getElementById("responsavel").value = ultimo.responsavel;
-    }
-
-    // Renderizar carrinho
     function renderizarCarrinho() {
       const div = document.getElementById("carrinho");
       div.innerHTML = "<h3>Itens adicionados:</h3>";
@@ -316,146 +282,40 @@
         el.innerHTML = `
           <div><strong>${item.codigo}</strong> - ${item.descricao} (${item.quantidade})</div>
           <div><small>Transação: ${item.transacao} | Centro: ${item.centro} | Solicitante: ${item.solicitante} | Responsável: ${item.responsavel}</small></div>
-          <div class="acoes">
-            <button onclick="editarItem(${i})">📝</button>
-            <button class="excluir" onclick="excluirItem(${i})">🗑️</button>
-          </div>
         `;
         div.appendChild(el);
       });
     }
 
-    // Editar item do carrinho
-    function editarItem(i) {
-      if (!confirm("Deseja editar este item?")) return;
-      const item = carrinho[i];
-      editandoIndex = i;
-      document.getElementById("codigo").value = item.codigo;
-      document.getElementById("descricao").value = item.descricao;
-      document.getElementById("quantidade").value = item.quantidade;
-      document.getElementById("transacao").value = item.transacao;
-      document.getElementById("centro").value = item.centro;
-      document.getElementById("solicitante").value = item.solicitante;
-      document.getElementById("responsavel").value = item.responsavel;
-      document.getElementById("codigo").focus();
-    }
-
-    // Excluir item do carrinho
-    function excluirItem(i) {
-      if (!confirm("Deseja realmente excluir este item?")) return;
-      carrinho.splice(i, 1);
-      renderizarCarrinho();
-    }
-
-    // Finalizar entrega e limpar tudo
     function finalizarEntrega() {
       if (carrinho.length === 0) {
-        alert("Adicione pelo menos um item antes de finalizar.");
+        alert("Adicione pelo menos um item.");
         return;
       }
       alert("Entrega finalizada!");
       carrinho = [];
       renderizarCarrinho();
-      document.querySelectorAll("input").forEach(i => i.value = "");
-      editandoIndex = -1;
-      document.getElementById("codigo").focus();
+      document.querySelectorAll("#aba-uso input").forEach(inp => inp.value = "");
+      document.getElementById("quantidade").value = 1;
     }
 
-    // Scanner Uso Consumo (câmera traseira se disponível)
-    function iniciarScanner() {
-      const div = document.getElementById("leitor-camera");
-      div.style.display = "block";
-      scanner = new Html5Qrcode("leitor-camera");
-
-      Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length) {
-          const backCam = cameras.find(cam =>
-            cam.label.toLowerCase().includes("back") ||
-            cam.label.toLowerCase().includes("traseira")
-          );
-          const camId = backCam ? backCam.id : cameras[0].id;
-
-          scanner.start(
-            camId,
-            { fps: 10, qrbox: { width: 250, height: 100 } },
-            (codigoLido) => {
-              document.getElementById("codigo").value = codigoLido;
-              buscarDescricao();
-              scanner.stop().then(() => {
-                div.innerHTML = "";
-                div.style.display = "none";
-              });
-            },
-            (err) => {}
-          ).catch(e => {
-            alert("Erro ao acessar a câmera");
-          });
-        } else {
-          alert("Nenhuma câmera encontrada");
-        }
-      });
-    }
-
-    // Controle quantidade Transferência
-    function alterarQuantidadeTransf(valor) {
-      const campo = document.getElementById("quantidadeTransf");
-      let atual = parseInt(campo.value) || 1;
-      campo.value = Math.max(1, atual + valor);
-    }
-
-    // Scanner Transferência (usa primeira câmera disponível)
-    function iniciarScannerTransferencia() {
-      const scannerDiv = document.getElementById("leitor-camera-transferencia");
-      scannerDiv.style.display = "block";
-      const scannerTransf = new Html5Qrcode("leitor-camera-transferencia");
-
-      Html5Qrcode.getCameras().then(cameras => {
-        if (cameras.length) {
-          const camId = cameras[0].id;
-          scannerTransf.start(
-            camId,
-            { fps: 10, qrbox: { width: 250, height: 100 } },
-            (codigoLido) => {
-              document.getElementById("codigoTransf").value = codigoLido;
-              // Aqui você pode implementar busca descrição também se quiser
-              scannerTransf.stop().then(() => {
-                scannerDiv.innerHTML = "";
-                scannerDiv.style.display = "none";
-              });
-            }
-          ).catch(err => {
-            alert("Erro ao acessar a câmera");
-          });
-        } else {
-          alert("Nenhuma câmera disponível");
-        }
-      });
-    }
-
-    // Registrar transferência (só alerta e limpa campos)
     function registrarTransferencia() {
-      const origem = document.getElementById("origem").value.trim();
-      const destino = document.getElementById("destino").value.trim();
-      const solicitante = document.getElementById("solicitanteTransf").value.trim();
-      const responsavel = document.getElementById("responsavelTransf").value.trim();
-      const codigo = document.getElementById("codigoTransf").value.trim();
-      const descricao = document.getElementById("descricaoTransf").value.trim();
-      const quantidade = parseInt(document.getElementById("quantidadeTransf").value);
+      const origem = document.getElementById("origem").value;
+      const destino = document.getElementById("destino").value;
+      const solicitante = document.getElementById("solicitanteTransf").value;
+      const responsavel = document.getElementById("responsavelTransf").value;
+      const codigo = document.getElementById("codigoTransf").value;
+      const descricao = document.getElementById("descricaoTransf").value;
+      const quantidade = document.getElementById("quantidadeTransf").value;
 
-      if (!origem || !destino || !solicitante || !responsavel || !codigo || !descricao || !quantidade || quantidade < 1) {
-        alert("Preencha corretamente todos os campos para registrar transferência.");
+      if (!origem || !destino || !codigo || !quantidade) {
+        alert("Preencha todos os campos.");
         return;
       }
 
-      alert(`Transferência registrada:\nOrigem: ${origem}\nDestino: ${destino}\nSolicitante: ${solicitante}\nResponsável: ${responsavel}\nProduto: ${descricao} (${codigo})\nQuantidade: ${quantidade}`);
+      alert(`Transferência registrada:\nDe: ${origem}\nPara: ${destino}\n${codigo} - ${descricao} (${quantidade})`);
 
-      // Limpa campos após registrar
-      document.getElementById("origem").value = "";
-      document.getElementById("destino").value = "";
-      document.getElementById("solicitanteTransf").value = "";
-      document.getElementById("responsavelTransf").value = "";
-      document.getElementById("codigoTransf").value = "";
-      document.getElementById("descricaoTransf").value = "";
+      document.querySelectorAll("#aba-transferencia input").forEach(inp => inp.value = "");
       document.getElementById("quantidadeTransf").value = 1;
     }
   </script>
