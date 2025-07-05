@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Entrega de Materiais</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: Arial, sans-serif;
       margin: 10px;
-      padding: 0;
       background: #f9f9f9;
     }
 
@@ -29,8 +26,7 @@
       margin-bottom: 5px;
     }
 
-    input[type="text"],
-    input[type="number"] {
+    input[type="text"], input[type="number"] {
       width: 100%;
       max-width: 100%;
       padding: 10px;
@@ -125,8 +121,8 @@
   <!-- Código de barras + manual -->
   <label>Código de barras ou manual:</label>
   <div class="linha">
-    <input type="text" id="codigo" placeholder="Código de barras">
-    <button disabled>📷</button> <!-- Scanner em breve -->
+    <input type="text" id="codigo" placeholder="Código de barras" onblur="buscarDescricao()">
+    <button disabled>📷</button>
   </div>
 
   <!-- Descrição -->
@@ -147,7 +143,6 @@
   <!-- Carrinho -->
   <div class="carrinho" id="carrinho">
     <h3>Itens adicionados:</h3>
-    <!-- Lista dinâmica aparecerá aqui -->
   </div>
 
   <!-- Campos finais -->
@@ -168,6 +163,8 @@
   </div>
 
   <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
+
     function alterarQuantidade(valor) {
       const campo = document.getElementById("quantidade");
       let atual = parseInt(campo.value) || 1;
@@ -175,13 +172,30 @@
       campo.value = atual;
     }
 
+    async function buscarDescricao() {
+      const codigo = document.getElementById("codigo").value.trim();
+      if (!codigo) return;
+
+      try {
+        const res = await fetch(`${API_URL}?codigo=${codigo}`);
+        const json = await res.json();
+        if (json.descricao) {
+          document.getElementById("descricao").value = json.descricao;
+        } else {
+          document.getElementById("descricao").value = "Produto não encontrado";
+        }
+      } catch (e) {
+        document.getElementById("descricao").value = "Erro na busca";
+      }
+    }
+
     function adicionarItem() {
-      const codigo = document.getElementById("codigo").value;
-      const descricao = document.getElementById("descricao").value;
+      const codigo = document.getElementById("codigo").value.trim();
+      const descricao = document.getElementById("descricao").value.trim();
       const quantidade = document.getElementById("quantidade").value;
 
-      if (!codigo || !descricao || !quantidade) {
-        alert("Preencha todos os campos antes de adicionar.");
+      if (!codigo || !descricao || !quantidade || descricao === "Produto não encontrado") {
+        alert("Preencha um código válido e aguarde a descrição.");
         return;
       }
 
@@ -190,10 +204,10 @@
       item.innerText = `Código: ${codigo} | Descrição: ${descricao} | Quantidade: ${quantidade}`;
       document.getElementById("carrinho").appendChild(item);
 
-      // Mostrar área de finalização
+      // Mostrar campos finais
       document.getElementById("finalizar").style.display = "block";
 
-      // Limpa campos
+      // Limpar campos
       document.getElementById("codigo").value = "";
       document.getElementById("descricao").value = "";
       document.getElementById("quantidade").value = 1;
