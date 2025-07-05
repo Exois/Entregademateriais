@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrega de Materiais</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 15px;
+      padding: 0;
+      background: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .linha {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .linha input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .linha button {
+      padding: 10px;
+      font-size: 18px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    .quantidade-control {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .quantidade-control button {
+      width: 30px;
+      height: 30px;
+      font-size: 20px;
+    }
+
+    .carrinho {
+      margin-top: 20px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    .carrinho-item {
+      background: #fff;
+      padding: 10px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .finalizar {
+      margin-top: 20px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .finalizar input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+
+    .btn-principal {
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Entrega de Materiais</h1>
+
+  <!-- Código de barras + manual -->
+  <label>Código de barras ou manual:</label>
+  <div class="linha">
+    <input type="text" id="codigo" placeholder="Código de barras">
+    <button disabled>📷</button> <!-- Leitura futura -->
+  </div>
+
+  <!-- Descrição -->
+  <label>Descrição:</label>
+  <input type="text" id="descricao" placeholder="Descrição do produto" readonly>
+
+  <!-- Quantidade -->
+  <label>Quantidade:</label>
+  <div class="quantidade-control">
+    <button onclick="alterarQuantidade(-1)">−</button>
+    <input type="number" id="quantidade" value="1" min="1">
+    <button onclick="alterarQuantidade(1)">+</button>
+  </div>
+
+  <!-- Botão adicionar -->
+  <button class="btn-principal" onclick="adicionarItem()">Adicionar ao carrinho</button>
+
+  <!-- Carrinho -->
+  <div class="carrinho" id="carrinho">
+    <h3>Itens adicionados:</h3>
+    <!-- Lista dinâmica aparecerá aqui -->
+  </div>
+
+  <!-- Campos finais -->
+  <div class="finalizar">
+    <label>Transação (3 caracteres):</label>
+    <input type="text" maxlength="3">
+
+    <label>Centro de Custo (6 caracteres):</label>
+    <input type="text" maxlength="6">
+
+    <label>Solicitante:</label>
+    <input type="text">
+
+    <label>Responsável pelo Atendimento:</label>
+    <input type="text">
+
+    <button class="btn-principal">Finalizar Entrega</button>
+  </div>
+
+  <script>
+    function alterarQuantidade(valor) {
+      const campo = document.getElementById("quantidade");
+      let atual = parseInt(campo.value) || 1;
+      atual = Math.max(1, atual + valor);
+      campo.value = atual;
+    }
+
+    function adicionarItem() {
+      const codigo = document.getElementById("codigo").value;
+      const descricao = document.getElementById("descricao").value;
+      const quantidade = document.getElementById("quantidade").value;
+
+      if (!codigo || !descricao || !quantidade) {
+        alert("Preencha todos os campos antes de adicionar.");
+        return;
+      }
+
+      const item = document.createElement("div");
+      item.className = "carrinho-item";
+      item.innerText = `Código: ${codigo} | Descrição: ${descricao} | Quantidade: ${quantidade}`;
+
+      document.getElementById("carrinho").appendChild(item);
+
+      // Limpa campos
+      document.getElementById("codigo").value = "";
+      document.getElementById("descricao").value = "";
+      document.getElementById("quantidade").value = 1;
+    }
+  </script>
+
+</body>
+</html>
