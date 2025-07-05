@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Entrega de Materiais</title>
-  <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -93,9 +93,15 @@
       color: white;
       padding: 5px 10px;
       font-size: 16px;
+      border: none;
+      border-radius: 5px;
     }
     .acoes button.excluir {
       background-color: #f44336;
+    }
+    #leitor-camera {
+      display: none;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -115,13 +121,14 @@
   <label>Responsável pelo Atendimento:</label>
   <input type="text" id="responsavel" />
 
-  <!-- Código + câmera -->
+  <!-- Código + scanner -->
   <label>Código de barras ou manual:</label>
   <div class="linha">
     <input type="text" id="codigo" placeholder="Digite ou escaneie o código" autocomplete="off">
-    <button onclick="document.getElementById('fotoInput').click()">📷</button>
+    <button onclick="iniciarScanner()">📷</button>
   </div>
-  <input type="file" accept="image/*" capture="environment" id="fotoInput" style="display: none;" />
+
+  <div id="leitor-camera"></div>
 
   <label>Descrição:</label>
   <input type="text" id="descricao" readonly placeholder="Descrição do produto aparecerá aqui" />
@@ -145,6 +152,7 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
     let carrinho = [];
     let editandoIndex = -1;
+    let scanner = null;
 
     function alterarQuantidade(valor) {
       const campo = document.getElementById("quantidade");
@@ -262,31 +270,34 @@
       document.getElementById("codigo").focus();
     }
 
-    // Leitura por imagem
-    const inputFoto = document.getElementById('fotoInput');
-    inputFoto.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result;
-        Quagga.decodeSingle({
-          src: dataUrl,
-          numOfWorkers: 0,
-          inputStream: { size: 800 },
-          decoder: { readers: ["ean_reader", "code_128_reader", "code_39_reader"] }
-        }, (result) => {
-          if (result && result.codeResult) {
-            document.getElementById("codigo").value = result.codeResult.code;
-            buscarDescricao();
-          } else {
-            alert("Não foi possível ler o código.");
-          }
-        });
-      };
-      reader.readAsDataURL(file);
-    });
-  </script>
+    function iniciarScanner() {
+      const div = document.getElementById("leitor-camera");
+      div.style.display = "block";
+      scanner = new Html5Qrcode("leitor-camera");
 
+      Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length) {
+          const camId = cameras[0].id;
+          scanner.start(
+            camId,
+            { fps: 10, qrbox: { width: 250, height: 100 } },
+            (codigoLido) => {
+              document.getElementById("codigo").value = codigoLido;
+              buscarDescricao();
+              scanner.stop().then(() => {
+                div.innerHTML = "";
+                div.style.display = "none";
+              });
+            },
+            (err) => {}
+          ).catch(e => {
+            alert("Erro ao acessar a câmera");
+          });
+        } else {
+          alert("Nenhuma câmera encontrada");
+        }
+      });
+    }
+  </script>
 </body>
 </html>
