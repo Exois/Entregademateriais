@@ -37,14 +37,6 @@
     .linha input {
       flex: 1;
     }
-    .linha button {
-      padding: 10px;
-      font-size: 18px;
-      border-radius: 5px;
-      border: none;
-      background-color: #ccc;
-      color: #000;
-    }
     .quantidade-control {
       display: flex;
       gap: 5px;
@@ -59,6 +51,17 @@
       border: none;
       background-color: #eee;
     }
+    .btn-principal {
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
     .carrinho {
       margin-top: 20px;
       border-top: 1px solid #ccc;
@@ -72,49 +75,42 @@
       border-radius: 5px;
       position: relative;
     }
-    .carrinho-item button {
+    .carrinho-item .acoes {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: #f44336;
+      display: flex;
+      gap: 5px;
+    }
+    .carrinho-item button {
+      background: #2196F3;
       color: white;
       border: none;
       border-radius: 5px;
       padding: 5px 10px;
       cursor: pointer;
     }
-    .finalizar {
-      margin-top: 20px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      display: none;
-    }
-    .finalizar input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .btn-principal {
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 5px;
-      margin-top: 10px;
-      cursor: pointer;
+    .carrinho-item .excluir {
+      background: #f44336;
     }
   </style>
 </head>
 <body>
 
   <h1>Entrega de Materiais</h1>
+
+  <!-- Campos fixos no topo -->
+  <label>Transação (3 caracteres):</label>
+  <input type="text" maxlength="3" id="transacao">
+
+  <label>Centro de Custo (6 caracteres):</label>
+  <input type="text" maxlength="6" id="centro">
+
+  <label>Solicitante:</label>
+  <input type="text" id="solicitante">
+
+  <label>Responsável pelo Atendimento:</label>
+  <input type="text" id="responsavel">
 
   <label>Código de barras ou manual:</label>
   <div class="linha">
@@ -133,101 +129,62 @@
   </div>
 
   <button class="btn-principal" onclick="adicionarItem()">Adicionar ao carrinho</button>
-  <button class="btn-principal" id="editarUltimoBtn" style="display:none;">Editar Último Item</button>
 
   <div class="carrinho" id="carrinho">
     <h3>Itens adicionados:</h3>
   </div>
 
-  <div class="finalizar" id="finalizar">
-    <label>Transação (3 caracteres):</label>
-    <input type="text" maxlength="3" id="inputTransacao">
-
-    <label>Centro de Custo (6 caracteres):</label>
-    <input type="text" maxlength="6" id="inputCentroCusto">
-
-    <label>Solicitante:</label>
-    <input type="text" id="inputSolicitante">
-
-    <label>Responsável pelo Atendimento:</label>
-    <input type="text" id="inputResponsavel">
-
-    <button class="btn-principal" id="finalizarBtn">Finalizar Entrega</button>
-  </div>
+  <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
 
     let carrinho = [];
     let editandoIndex = -1;
-    let ultimoCentroCusto = "";
 
     function alterarQuantidade(valor) {
       const campo = document.getElementById("quantidade");
       let atual = parseInt(campo.value) || 1;
-      atual = Math.max(1, atual + valor);
-      campo.value = atual;
+      campo.value = Math.max(1, atual + valor);
     }
 
     async function buscarDescricao() {
       const codigo = document.getElementById("codigo").value.trim();
       if (!codigo) return;
-
       try {
         const res = await fetch(`${API_URL}?codigo=${codigo}`);
         const json = await res.json();
-        if (json.descricao) {
-          document.getElementById("descricao").value = json.descricao;
-        } else {
-          document.getElementById("descricao").value = "Produto não encontrado";
-        }
-      } catch (e) {
+        document.getElementById("descricao").value = json.descricao || "Produto não encontrado";
+      } catch {
         document.getElementById("descricao").value = "Erro na busca";
       }
-    }
-
-    function renderizarCarrinho() {
-      const carrinhoDiv = document.getElementById("carrinho");
-      carrinhoDiv.innerHTML = "<h3>Itens adicionados:</h3>";
-      carrinho.forEach((item, i) => {
-        const div = document.createElement("div");
-        div.className = "carrinho-item";
-        div.innerHTML = `
-          Código: ${item.codigo} | Descrição: ${item.descricao} | Quantidade: ${item.quantidade}
-          <button onclick="excluirItem(${i})">🗑️</button>
-        `;
-        carrinhoDiv.appendChild(div);
-      });
-
-      document.getElementById("editarUltimoBtn").style.display = carrinho.length > 0 ? "block" : "none";
-      document.getElementById("finalizar").style.display = carrinho.length > 0 ? "block" : "none";
     }
 
     function adicionarItem() {
       const codigo = document.getElementById("codigo").value.trim();
       const descricao = document.getElementById("descricao").value.trim();
       const quantidade = parseInt(document.getElementById("quantidade").value);
+      const transacao = document.getElementById("transacao").value.trim();
+      const centro = document.getElementById("centro").value.trim();
+      const solicitante = document.getElementById("solicitante").value.trim();
+      const responsavel = document.getElementById("responsavel").value.trim();
 
-      if (!codigo || !descricao || !quantidade || descricao === "Produto não encontrado") {
-        alert("Preencha um código válido e aguarde a descrição.");
+      if (!codigo || !descricao || descricao === "Produto não encontrado" || !quantidade) {
+        alert("Preencha corretamente os dados do item.");
         return;
       }
 
+      const novoItem = { codigo, descricao, quantidade, transacao, centro, solicitante, responsavel };
+
       if (editandoIndex >= 0) {
-        carrinho[editandoIndex] = { codigo, descricao, quantidade };
+        carrinho[editandoIndex] = novoItem;
         editandoIndex = -1;
       } else {
-        carrinho.push({ codigo, descricao, quantidade });
+        carrinho.push(novoItem);
       }
 
-      renderizarCarrinho();
-      bloquearCamposFixos();
       limparCamposItem();
-      restaurarCentroCusto();
-    }
-
-    function excluirItem(index) {
-      carrinho.splice(index, 1);
+      preencherCamposPadrao();
       renderizarCarrinho();
     }
 
@@ -237,62 +194,64 @@
       document.getElementById("quantidade").value = 1;
     }
 
-    function restaurarCentroCusto() {
-      if (ultimoCentroCusto) {
-        document.getElementById("inputCentroCusto").value = ultimoCentroCusto;
+    function preencherCamposPadrao() {
+      if (carrinho.length > 0) {
+        const ultimo = carrinho[carrinho.length - 1];
+        document.getElementById("transacao").value = ultimo.transacao;
+        document.getElementById("centro").value = ultimo.centro;
+        document.getElementById("solicitante").value = ultimo.solicitante;
+        document.getElementById("responsavel").value = ultimo.responsavel;
       }
     }
 
-    function bloquearCamposFixos() {
-      const cc = document.getElementById("inputCentroCusto");
-      const sol = document.getElementById("inputSolicitante");
-      const resp = document.getElementById("inputResponsavel");
-
-      if (sol.value.trim() && resp.value.trim()) {
-        sol.readOnly = true;
-        resp.readOnly = true;
-        sol.style.backgroundColor = "#eee";
-        resp.style.backgroundColor = "#eee";
-      }
-
-      if (cc.value.trim()) {
-        ultimoCentroCusto = cc.value.trim();
-      }
+    function renderizarCarrinho() {
+      const div = document.getElementById("carrinho");
+      div.innerHTML = "<h3>Itens adicionados:</h3>";
+      carrinho.forEach((item, i) => {
+        const el = document.createElement("div");
+        el.className = "carrinho-item";
+        el.innerHTML = `
+          <div><strong>${item.codigo}</strong> - ${item.descricao} (${item.quantidade})</div>
+          <div><small>Transação: ${item.transacao} | Centro: ${item.centro} | Solicitante: ${item.solicitante} | Responsável: ${item.responsavel}</small></div>
+          <div class="acoes">
+            <button onclick="editarItem(${i})">📝</button>
+            <button class="excluir" onclick="excluirItem(${i})">🗑️</button>
+          </div>
+        `;
+        div.appendChild(el);
+      });
     }
 
-    document.getElementById("editarUltimoBtn").addEventListener("click", () => {
-      if (carrinho.length === 0) return;
-      editandoIndex = carrinho.length - 1;
-      const item = carrinho[editandoIndex];
+    function editarItem(i) {
+      if (!confirm("Deseja editar este item?")) return;
+      const item = carrinho[i];
+      editandoIndex = i;
       document.getElementById("codigo").value = item.codigo;
       document.getElementById("descricao").value = item.descricao;
       document.getElementById("quantidade").value = item.quantidade;
+      document.getElementById("transacao").value = item.transacao;
+      document.getElementById("centro").value = item.centro;
+      document.getElementById("solicitante").value = item.solicitante;
+      document.getElementById("responsavel").value = item.responsavel;
       document.getElementById("codigo").focus();
-    });
+    }
 
-    document.getElementById("finalizarBtn").addEventListener("click", () => {
+    function excluirItem(i) {
+      if (!confirm("Deseja realmente excluir este item?")) return;
+      carrinho.splice(i, 1);
+      renderizarCarrinho();
+    }
+
+    function finalizarEntrega() {
       if (carrinho.length === 0) {
-        alert("Adicione pelo menos um item antes de finalizar.");
+        alert("Adicione pelo menos um item.");
         return;
       }
-
       alert("Entrega finalizada!");
       carrinho = [];
       renderizarCarrinho();
-      limparCamposItem();
-
-      document.getElementById("finalizar").style.display = "none";
-
-      ["inputCentroCusto", "inputSolicitante", "inputResponsavel"].forEach(id => {
-        const el = document.getElementById(id);
-        el.readOnly = false;
-        el.style.backgroundColor = "white";
-        el.value = "";
-      });
-
-      document.getElementById("inputTransacao").value = "";
-      ultimoCentroCusto = "";
-    });
+      document.querySelectorAll("input").forEach(el => el.value = "");
+    }
   </script>
 </body>
 </html>
