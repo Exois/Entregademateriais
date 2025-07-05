@@ -1,218 +1,170 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entrega de Materiais</title>
-  <style>
-    * { box-sizing: border-box; }
+<!-- ... mantive seu HTML igual, exceto a parte final -->
 
-    body {
-      font-family: Arial, sans-serif;
-      margin: 10px;
-      background: #f9f9f9;
-    }
+<!-- Campos finais -->
+<div class="finalizar" id="finalizar" style="display:none;">
+  <label>Transação (3 caracteres):</label>
+  <input type="text" maxlength="3" id="inputTransacao">
 
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
-    }
+  <label>Centro de Custo (6 caracteres):</label>
+  <input type="text" maxlength="6" id="inputCentroCusto">
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-      margin-bottom: 5px;
-    }
+  <label>Solicitante:</label>
+  <input type="text" id="inputSolicitante">
 
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      max-width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
+  <label>Responsável pelo Atendimento:</label>
+  <input type="text" id="inputResponsavel">
 
-    .linha {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 10px;
-    }
+  <button class="btn-principal" id="finalizarBtn">Finalizar Entrega</button>
+</div>
 
-    .linha input {
-      flex: 1;
-    }
+<button class="btn-principal" id="editarUltimoBtn" style="display:none; margin-top:10px;">Editar Último Item</button>
 
-    .linha button {
-      padding: 10px;
-      font-size: 18px;
-      border-radius: 5px;
-      border: none;
-      background-color: #ccc;
-      color: #000;
-    }
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
 
-    .quantidade-control {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-      margin-top: 5px;
-    }
+  let carrinho = [];
+  let editandoIndex = -1;
 
-    .quantidade-control button {
-      width: 30px;
-      height: 30px;
-      font-size: 20px;
-      border-radius: 5px;
-      border: none;
-      background-color: #eee;
-    }
+  function alterarQuantidade(valor) {
+    const campo = document.getElementById("quantidade");
+    let atual = parseInt(campo.value) || 1;
+    atual = Math.max(1, atual + valor);
+    campo.value = atual;
+  }
 
-    .carrinho {
-      margin-top: 20px;
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-    }
+  async function buscarDescricao() {
+    const codigo = document.getElementById("codigo").value.trim();
+    if (!codigo) return;
 
-    .carrinho-item {
-      background: #fff;
-      padding: 10px;
-      margin-bottom: 8px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-
-    .finalizar {
-      margin-top: 20px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      display: none;
-    }
-
-    .finalizar input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    .btn-principal {
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>Entrega de Materiais</h1>
-
-  <!-- Código de barras + manual -->
-  <label>Código de barras ou manual:</label>
-  <div class="linha">
-    <input type="text" id="codigo" placeholder="Código de barras" onblur="buscarDescricao()">
-    <button disabled>📷</button>
-  </div>
-
-  <!-- Descrição -->
-  <label>Descrição:</label>
-  <input type="text" id="descricao" placeholder="Descrição do produto" readonly>
-
-  <!-- Quantidade -->
-  <label>Quantidade:</label>
-  <div class="quantidade-control">
-    <button onclick="alterarQuantidade(-1)">−</button>
-    <input type="number" id="quantidade" value="1" min="1">
-    <button onclick="alterarQuantidade(1)">+</button>
-  </div>
-
-  <!-- Botão adicionar -->
-  <button class="btn-principal" onclick="adicionarItem()">Adicionar ao carrinho</button>
-
-  <!-- Carrinho -->
-  <div class="carrinho" id="carrinho">
-    <h3>Itens adicionados:</h3>
-  </div>
-
-  <!-- Campos finais -->
-  <div class="finalizar" id="finalizar">
-    <label>Transação (3 caracteres):</label>
-    <input type="text" maxlength="3">
-
-    <label>Centro de Custo (6 caracteres):</label>
-    <input type="text" maxlength="6">
-
-    <label>Solicitante:</label>
-    <input type="text">
-
-    <label>Responsável pelo Atendimento:</label>
-    <input type="text">
-
-    <button class="btn-principal">Finalizar Entrega</button>
-  </div>
-
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
-
-    function alterarQuantidade(valor) {
-      const campo = document.getElementById("quantidade");
-      let atual = parseInt(campo.value) || 1;
-      atual = Math.max(1, atual + valor);
-      campo.value = atual;
-    }
-
-    async function buscarDescricao() {
-      const codigo = document.getElementById("codigo").value.trim();
-      if (!codigo) return;
-
-      try {
-        const res = await fetch(`${API_URL}?codigo=${codigo}`);
-        const json = await res.json();
-        if (json.descricao) {
-          document.getElementById("descricao").value = json.descricao;
-        } else {
-          document.getElementById("descricao").value = "Produto não encontrado";
-        }
-      } catch (e) {
-        document.getElementById("descricao").value = "Erro na busca";
+    try {
+      const res = await fetch(`${API_URL}?codigo=${codigo}`);
+      const json = await res.json();
+      if (json.descricao) {
+        document.getElementById("descricao").value = json.descricao;
+      } else {
+        document.getElementById("descricao").value = "Produto não encontrado";
       }
+    } catch (e) {
+      document.getElementById("descricao").value = "Erro na busca";
+    }
+  }
+
+  function renderizarCarrinho() {
+    const carrinhoDiv = document.getElementById("carrinho");
+    carrinhoDiv.innerHTML = "<h3>Itens adicionados:</h3>";
+    carrinho.forEach((item, i) => {
+      const div = document.createElement("div");
+      div.className = "carrinho-item";
+      div.innerText = `Código: ${item.codigo} | Descrição: ${item.descricao} | Quantidade: ${item.quantidade}`;
+      carrinhoDiv.appendChild(div);
+    });
+
+    // Mostrar botão editar se tiver itens
+    document.getElementById("editarUltimoBtn").style.display = carrinho.length > 0 ? "block" : "none";
+  }
+
+  function adicionarItem() {
+    const codigo = document.getElementById("codigo").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const quantidade = parseInt(document.getElementById("quantidade").value);
+
+    if (!codigo || !descricao || !quantidade || descricao === "Produto não encontrado") {
+      alert("Preencha um código válido e aguarde a descrição.");
+      return;
     }
 
-    function adicionarItem() {
-      const codigo = document.getElementById("codigo").value.trim();
-      const descricao = document.getElementById("descricao").value.trim();
-      const quantidade = document.getElementById("quantidade").value;
-
-      if (!codigo || !descricao || !quantidade || descricao === "Produto não encontrado") {
-        alert("Preencha um código válido e aguarde a descrição.");
-        return;
-      }
-
-      const item = document.createElement("div");
-      item.className = "carrinho-item";
-      item.innerText = `Código: ${codigo} | Descrição: ${descricao} | Quantidade: ${quantidade}`;
-      document.getElementById("carrinho").appendChild(item);
-
-      // Mostrar campos finais
-      document.getElementById("finalizar").style.display = "block";
-
-      // Limpar campos
-      document.getElementById("codigo").value = "";
-      document.getElementById("descricao").value = "";
-      document.getElementById("quantidade").value = 1;
+    if (editandoIndex >= 0) {
+      // Editando item existente
+      carrinho[editandoIndex] = { codigo, descricao, quantidade };
+      editandoIndex = -1;
+    } else {
+      // Adicionando novo item
+      carrinho.push({ codigo, descricao, quantidade });
     }
-  </script>
 
-</body>
-</html>
+    renderizarCarrinho();
+
+    // Mostrar campos finais
+    const finalizarDiv = document.getElementById("finalizar");
+    finalizarDiv.style.display = "block";
+
+    // Se for primeira vez preenchendo os campos fixos, deixa editável, senão bloqueia
+    bloquearCamposFixos();
+
+    // Limpar campos para novo item
+    limparCamposItem();
+  }
+
+  function limparCamposItem() {
+    document.getElementById("codigo").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("quantidade").value = 1;
+  }
+
+  // Função para abrir edição do último item
+  document.getElementById("editarUltimoBtn").addEventListener("click", () => {
+    if (carrinho.length === 0) return;
+    editandoIndex = carrinho.length - 1;
+    const item = carrinho[editandoIndex];
+    document.getElementById("codigo").value = item.codigo;
+    document.getElementById("descricao").value = item.descricao;
+    document.getElementById("quantidade").value = item.quantidade;
+
+    // Focar no código para facilitar a edição
+    document.getElementById("codigo").focus();
+  });
+
+  // Função para bloquear campos fixos após preenchimento
+  function bloquearCamposFixos() {
+    const centroCusto = document.getElementById("inputCentroCusto");
+    const solicitante = document.getElementById("inputSolicitante");
+    const responsavel = document.getElementById("inputResponsavel");
+
+    // Se algum desses estiver vazio, deixa editável para preencher pela primeira vez
+    if (centroCusto.value.trim() && solicitante.value.trim() && responsavel.value.trim()) {
+      centroCusto.readOnly = true;
+      solicitante.readOnly = true;
+      responsavel.readOnly = true;
+      centroCusto.style.backgroundColor = "#eee";
+      solicitante.style.backgroundColor = "#eee";
+      responsavel.style.backgroundColor = "#eee";
+    } else {
+      centroCusto.readOnly = false;
+      solicitante.readOnly = false;
+      responsavel.readOnly = false;
+      centroCusto.style.backgroundColor = "white";
+      solicitante.style.backgroundColor = "white";
+      responsavel.style.backgroundColor = "white";
+    }
+  }
+
+  // Pode adicionar um listener para o botão finalizar, se quiser
+  document.getElementById("finalizarBtn").addEventListener("click", () => {
+    if (carrinho.length === 0) {
+      alert("Adicione pelo menos um item antes de finalizar.");
+      return;
+    }
+    // Aqui você pode coletar os dados e enviar pra onde precisar
+    alert("Entrega finalizada!");
+    // Reset tudo
+    carrinho = [];
+    renderizarCarrinho();
+    limparCamposItem();
+    document.getElementById("finalizar").style.display = "none";
+
+    // Liberar campos fixos para próxima entrega
+    document.getElementById("inputCentroCusto").readOnly = false;
+    document.getElementById("inputSolicitante").readOnly = false;
+    document.getElementById("inputResponsavel").readOnly = false;
+    document.getElementById("inputCentroCusto").style.backgroundColor = "white";
+    document.getElementById("inputSolicitante").style.backgroundColor = "white";
+    document.getElementById("inputResponsavel").style.backgroundColor = "white";
+
+    // Limpar campos fixos e transação
+    document.getElementById("inputCentroCusto").value = "";
+    document.getElementById("inputSolicitante").value = "";
+    document.getElementById("inputResponsavel").value = "";
+    document.getElementById("inputTransacao").value = "";
+  });
+
+</script>
