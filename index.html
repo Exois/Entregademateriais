@@ -1,339 +1,375 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Entrega de Materiais</title>
-<script src="https://unpkg.com/html5-qrcode"></script>
-<style>
-  :root {
-    --cor1: #A172EA;
-    --cor2: #D09AF4;
-    --cor3: #FFC1FF;
-    --cor-bg: linear-gradient(135deg, #724BDF, #D09AF4);
-    --text-color: white;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0; padding: 20px;
-    background: var(--cor-bg);
-    color: var(--text-color);
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .tabs {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .tabs button {
-    background: var(--cor2);
-    color: var(--text-color);
-    font-weight: bold;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .tabs button.active {
-    background: var(--cor3);
-    color: #8A2BE2;
-  }
-  .aba {
-    display: none;
-  }
-  .aba.active {
-    display: block;
-  }
-  label {
-    display: block;
-    margin: 10px 0 5px;
-    font-weight: bold;
-  }
-  input[type="text"], input[type="number"] {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    background: var(--cor1);
-    color: var(--text-color);
-    font-size: 16px;
-  }
-  .linha {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-  }
-  .linha input {
-    flex: 1;
-  }
-  .linha button {
-    padding: 10px;
-    background: var(--cor3);
-    color: #8A2BE2;
-    font-size: 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .quantidade-control {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 5px;
-  }
-  .quantidade-control button {
-    background: var(--cor3);
-    color: #8A2BE2;
-    border: none;
-    border-radius: 8px;
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  .btn-principal {
-    background: var(--cor3);
-    color: #8A2BE2;
-    padding: 12px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    width: 100%;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-  #leitor-camera, #leitor-camera-transferencia {
-    display: none;
-    margin-top: 10px;
-  }
-  .btn-fechar {
-    margin-top: 5px;
-    background: transparent;
-    border: 1px solid #fff;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .carrinho {
-    margin-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.3);
-    padding-top: 10px;
-  }
-  .carrinho-item {
-    background: rgba(255,255,255,0.1);
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.3);
-    margin-bottom: 8px;
-    position: relative;
-  }
-  .acoes {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    display: flex;
-    gap: 5px;
-  }
-  .acoes button {
-    background-color: #2196f3;
-    color: white;
-    padding: 5px 10px;
-    font-size: 14px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  .acoes button.excluir {
-    background-color: #f44336;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entrega de Materiais</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    :root {
+      --cor1: #A172EA;
+      --cor2: #D09AF4;
+      --cor3: #FFC1FF;
+      --cor-bg: linear-gradient(135deg, #724BDF, #D09AF4);
+      --text-color: white;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 20px;
+      background: var(--cor-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tabs button {
+      background: var(--cor2);
+      color: var(--text-color);
+      font-weight: bold;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .tabs button.active {
+      background: var(--cor3);
+      color: #8A2BE2;
+    }
+    .aba {
+      display: none;
+    }
+    .aba.active {
+      display: block;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: var(--cor1);
+      color: var(--text-color);
+      font-size: 16px;
+    }
+    .linha {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      margin-top: 5px;
+    }
+    .linha input {
+      flex: 1;
+    }
+    .linha button {
+      padding: 10px;
+      background: var(--cor3);
+      color: #8A2BE2;
+      font-size: 22px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .quantidade-control {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .quantidade-control button {
+      background: var(--cor3);
+      color: #8A2BE2;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      font-size: 22px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-principal {
+      background: var(--cor3);
+      color: #8A2BE2;
+      padding: 14px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      width: 100%;
+      margin-top: 15px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 17px;
+    }
+    .carrinho {
+      margin-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.3);
+      padding-top: 15px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .carrinho-item {
+      background: rgba(255 255 255 / 0.15);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      position: relative;
+      color: #fff;
+    }
+    .acoes {
+      position: absolute;
+      right: 10px;
+      top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+    .acoes button {
+      background-color: #8A2BE2;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      user-select: none;
+    }
+    .acoes button.excluir {
+      background-color: #F44336;
+    }
+    #leitor-camera, #leitor-camera-transferencia {
+      display: none;
+      margin-top: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .btn-fechar {
+      margin-top: 5px;
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Entrega de Materiais</h1>
+  <h1>Entrega de Materiais</h1>
 
-<div class="tabs">
-  <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
-  <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
-</div>
-
-<!-- ABA USO CONSUMO -->
-<div id="aba-uso" class="aba active">
-  <label>Transação (3 caracteres):</label>
-  <input type="text" id="transacao" maxlength="3" />
-
-  <label>Centro de Custo (6 caracteres):</label>
-  <input type="text" id="centro" maxlength="6" />
-
-  <label>Solicitante:</label>
-  <input type="text" id="solicitante" />
-
-  <label>Responsável pelo Atendimento:</label>
-  <input type="text" id="responsavel" />
-
-  <label>Código de barras ou manual:</label>
-  <div class="linha">
-    <input type="text" id="codigo" autocomplete="off" />
-    <button onclick="iniciarScanner('leitor-camera', 'codigo')">📷</button>
-  </div>
-  <div id="leitor-camera"></div>
-  <button class="btn-fechar" onclick="fecharCamera('leitor-camera')">Fechar Câmera</button>
-
-  <label>Descrição:</label>
-  <input type="text" id="descricao" readonly />
-
-  <label>Quantidade:</label>
-  <div class="quantidade-control">
-    <button onclick="alterarQuantidade('quantidade', -1)">−</button>
-    <input type="number" id="quantidade" value="1" min="1" />
-    <button onclick="alterarQuantidade('quantidade', 1)">+</button>
+  <div class="tabs">
+    <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
+    <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
   </div>
 
-  <button id="btn-adicionar-uso" class="btn-principal" onclick="adicionarItem('uso')">Adicionar ao carrinho</button>
-  <button id="btn-atualizar-uso" class="btn-principal" style="display:none;" onclick="atualizarItem('uso')">Atualizar Item</button>
+  <!-- ABA USO CONSUMO -->
+  <div id="aba-uso" class="aba active">
+    <label>Transação (3 caracteres):</label>
+    <input type="text" id="transacao" maxlength="3" autocomplete="off" />
 
-  <div class="carrinho" id="carrinho-uso">
-    <h3>Itens adicionados:</h3>
+    <label>Centro de Custo (6 caracteres):</label>
+    <input type="text" id="centro" maxlength="6" autocomplete="off" />
+
+    <label>Solicitante:</label>
+    <input type="text" id="solicitante" autocomplete="off" />
+
+    <label>Responsável pelo Atendimento:</label>
+    <input type="text" id="responsavel" autocomplete="off" />
+
+    <label>Código de barras ou manual:</label>
+    <div class="linha">
+      <input type="text" id="codigo" autocomplete="off" placeholder="Digite ou escaneie o código" />
+      <button title="Abrir câmera" onclick="iniciarScanner('leitor-camera', 'codigo')">📷</button>
+    </div>
+    <div id="leitor-camera"></div>
+    <button class="btn-fechar" onclick="fecharCamera('leitor-camera')">Fechar Câmera</button>
+
+    <label>Descrição:</label>
+    <input type="text" id="descricao" readonly placeholder="Descrição será preenchida automaticamente" />
+
+    <label>Quantidade:</label>
+    <div class="quantidade-control">
+      <button onclick="alterarQuantidade('quantidade', -1)">−</button>
+      <input type="number" id="quantidade" value="1" min="1" />
+      <button onclick="alterarQuantidade('quantidade', 1)">+</button>
+    </div>
+
+    <button class="btn-principal" onclick="adicionarItem()">Adicionar ao carrinho</button>
+
+    <div class="carrinho" id="carrinho">
+      <h3>Itens adicionados:</h3>
+    </div>
+
+    <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
   </div>
 
-  <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
-</div>
+  <!-- ABA TRANSFERÊNCIA -->
+  <div id="aba-transferencia" class="aba">
+    <label>Armazém de Origem:</label>
+    <input type="text" id="origem" autocomplete="off" />
 
-<!-- ABA TRANSFERÊNCIA -->
-<div id="aba-transferencia" class="aba">
-  <label>Armazém de Origem:</label>
-  <input type="text" id="origem" />
+    <label>Armazém de Destino:</label>
+    <input type="text" id="destino" autocomplete="off" />
 
-  <label>Armazém de Destino:</label>
-  <input type="text" id="destino" />
+    <label>Solicitante:</label>
+    <input type="text" id="solicitanteTransf" autocomplete="off" />
 
-  <label>Solicitante:</label>
-  <input type="text" id="solicitanteTransf" />
+    <label>Responsável pelo Atendimento:</label>
+    <input type="text" id="responsavelTransf" autocomplete="off" />
 
-  <label>Responsável pelo Atendimento:</label>
-  <input type="text" id="responsavelTransf" />
+    <label>Código de barras ou manual:</label>
+    <div class="linha">
+      <input type="text" id="codigoTransf" autocomplete="off" placeholder="Digite ou escaneie o código" />
+      <button title="Abrir câmera" onclick="iniciarScanner('leitor-camera-transferencia', 'codigoTransf')">📷</button>
+    </div>
+    <div id="leitor-camera-transferencia"></div>
+    <button class="btn-fechar" onclick="fecharCamera('leitor-camera-transferencia')">Fechar Câmera</button>
 
-  <label>Código de barras ou manual:</label>
-  <div class="linha">
-    <input type="text" id="codigoTransf" autocomplete="off" />
-    <button onclick="iniciarScanner('leitor-camera-transferencia', 'codigoTransf')">📷</button>
-  </div>
-  <div id="leitor-camera-transferencia"></div>
-  <button class="btn-fechar" onclick="fecharCamera('leitor-camera-transferencia')">Fechar Câmera</button>
+    <label>Descrição:</label>
+    <input type="text" id="descricaoTransf" readonly placeholder="Descrição será preenchida automaticamente" />
 
-  <label>Descrição:</label>
-  <input type="text" id="descricaoTransf" readonly />
+    <label>Quantidade:</label>
+    <div class="quantidade-control">
+      <button onclick="alterarQuantidade('quantidadeTransf', -1)">−</button>
+      <input type="number" id="quantidadeTransf" value="1" min="1" />
+      <button onclick="alterarQuantidade('quantidadeTransf', 1)">+</button>
+    </div>
 
-  <label>Quantidade:</label>
-  <div class="quantidade-control">
-    <button onclick="alterarQuantidade('quantidadeTransf', -1)">−</button>
-    <input type="number" id="quantidadeTransf" value="1" min="1" />
-    <button onclick="alterarQuantidade('quantidadeTransf', 1)">+</button>
-  </div>
-
-  <button id="btn-adicionar-transf" class="btn-principal" onclick="adicionarItem('transf')">Adicionar ao carrinho</button>
-  <button id="btn-atualizar-transf" class="btn-principal" style="display:none;" onclick="atualizarItem('transf')">Atualizar Item</button>
-
-  <div class="carrinho" id="carrinho-transf">
-    <h3>Itens adicionados:</h3>
+    <button class="btn-principal" onclick="registrarTransferencia()">Registrar Transferência</button>
   </div>
 
-  <button class="btn-principal" onclick="registrarTransferencia()">Registrar Transferência</button>
-</div>
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
 
-<script>
-  let scannerAtivo = null;
+    // Variáveis globais para scanner
+    let scannerAtivo = null;
 
-  // Carrinhos separados
-  let carrinhoUso = [];
-  let carrinhoTransf = [];
+    // Dados carrinho Uso Consumo
+    let carrinho = [];
+    let editandoIndex = -1;
 
-  // Índices para edição (um por aba)
-  let indiceEditandoUso = -1;
-  let indiceEditandoTransf = -1;
+    // Alterna abas
+    function mostrarAba(nomeAba) {
+      document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));
+      document.getElementById('aba-' + nomeAba).classList.add('active');
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + nomeAba).classList.add('active');
+      // Fecha qualquer scanner aberto
+      fecharCamera('leitor-camera');
+      fecharCamera('leitor-camera-transferencia');
+    }
 
-  function mostrarAba(qual) {
-    document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));
-    document.querySelector('#aba-' + qual).classList.add('active');
-    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-    document.querySelector('#btn-' + qual).classList.add('active');
-    fecharCamera('leitor-camera');
-    fecharCamera('leitor-camera-transferencia');
-  }
+    // Alterar quantidade ( + ou - )
+    function alterarQuantidade(idInput, delta) {
+      const input = document.getElementById(idInput);
+      let valor = parseInt(input.value) || 1;
+      valor += delta;
+      if (valor < 1) valor = 1;
+      input.value = valor;
+    }
 
-  function alterarQuantidade(id, val) {
-    const campo = document.getElementById(id);
-    let qtd = parseInt(campo.value) || 1;
-    campo.value = Math.max(1, qtd + val);
-  }
-
-  function iniciarScanner(divId, inputId) {
-    const div = document.getElementById(divId);
-    div.style.display = "block";
-
-    if(scannerAtivo){
-      scannerAtivo.stop().then(() => {
-        scannerAtivo.clear();
-        startScanner();
-      }).catch(() => {
-        startScanner();
-      });
-    } else {
+    // Iniciar scanner na câmera traseira
+    function iniciarScanner(divId, inputId) {
+      const div = document.getElementById(divId);
+      div.style.display = "block";
+      if (scannerAtivo) {
+        scannerAtivo.stop().then(() => {
+          scannerAtivo.clear();
+          startScanner();
+        });
+        return;
+      }
       startScanner();
+
+      function startScanner() {
+        scannerAtivo = new Html5Qrcode(divId);
+        Html5Qrcode.getCameras().then(cameras => {
+          if (cameras && cameras.length) {
+            const backCam = cameras.find(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('traseira'));
+            const camId = backCam ? backCam.id : cameras[0].id;
+            scannerAtivo.start(
+              camId,
+              { fps: 10, qrbox: { width: 250, height: 100 } },
+              qrCodeMessage => {
+                document.getElementById(inputId).value = qrCodeMessage;
+                buscarDescricaoPorInput(inputId);
+                fecharCamera(divId);
+              },
+              errorMessage => {
+                // Pode ignorar erros pequenos
+              }
+            ).catch(err => alert("Erro ao iniciar a câmera: " + err));
+          } else {
+            alert("Nenhuma câmera encontrada.");
+          }
+        });
+      }
     }
 
-    function startScanner(){
-      scannerAtivo = new Html5Qrcode(divId);
-      Html5Qrcode.getCameras().then(cameras => {
-        if (cameras.length) {
-          const traseira = cameras.find(cam =>
-            cam.label.toLowerCase().includes("back") ||
-            cam.label.toLowerCase().includes("traseira")
-          );
-          const camId = traseira ? traseira.id : cameras[0].id;
-
-          scannerAtivo.start(
-            camId,
-            { fps: 10, qrbox: { width: 250, height: 100 } },
-            (codigoLido) => {
-              document.getElementById(inputId).value = codigoLido;
-              fecharCamera(divId);
-            }
-          ).catch(() => {
-            alert("Erro ao acessar a câmera");
-          });
-        } else {
-          alert("Nenhuma câmera disponível");
-        }
-      });
+    // Fecha scanner se aberto
+    function fecharCamera(divId) {
+      if (scannerAtivo) {
+        scannerAtivo.stop().then(() => {
+          scannerAtivo.clear();
+          scannerAtivo = null;
+          const div = document.getElementById(divId);
+          div.innerHTML = "";
+          div.style.display = "none";
+        }).catch(() => {
+          // ignorar erro no stop
+        });
+      }
     }
-  }
 
-  function fecharCamera(divId) {
-    if (scannerAtivo) {
-      scannerAtivo.stop().then(() => {
-        scannerAtivo.clear();
-        scannerAtivo = null;
-        const div = document.getElementById(divId);
-        div.innerHTML = "";
-        div.style.display = "none";
-      }).catch(() => {
-        const div = document.getElementById(divId);
-        div.innerHTML = "";
-        div.style.display = "none";
-      });
+    // Buscar descrição via API para input especificado
+    async function buscarDescricaoPorInput(inputId) {
+      const codigo = document.getElementById(inputId).value.trim();
+      if (!codigo) {
+        preencherDescricao(inputId, "");
+        return;
+      }
+      preencherDescricao(inputId, "Buscando...");
+      try {
+        const res = await fetch(`${API_URL}?codigo=${encodeURIComponent(codigo)}`);
+        if (!res.ok) throw new Error("Erro na requisição");
+        const json = await res.json();
+        const descricao = json.descricao || "";
+        preencherDescricao(inputId, descricao || "Produto não encontrado");
+      } catch {
+        preencherDescricao(inputId, "Erro na busca");
+      }
     }
-  }
 
-  // Função para adicionar item ao carrinho das abas uso ou transf
-  function adicionarItem(aba) {
-    if (aba === 'uso') {
+    // Preenche o campo descrição correspondente ao input do código
+    function preencherDescricao(inputId, texto) {
+      if (inputId === "codigo") {
+        document.getElementById("descricao").value = texto;
+      } else if (inputId === "codigoTransf") {
+        document.getElementById("descricaoTransf").value = texto;
+      }
+    }
+
+    // Configura eventos blur para buscar descrição ao perder foco nos inputs código
+    document.getElementById("codigo").addEventListener("blur", () => buscarDescricaoPorInput("codigo"));
+    document.getElementById("codigoTransf").addEventListener("blur", () => buscarDescricaoPorInput("codigoTransf"));
+
+    // ----------- USO CONSUMO -----------
+
+    function adicionarItem() {
       const codigo = document.getElementById("codigo").value.trim();
       const descricao = document.getElementById("descricao").value.trim();
       const quantidade = parseInt(document.getElementById("quantidade").value);
@@ -342,94 +378,63 @@
       const solicitante = document.getElementById("solicitante").value.trim();
       const responsavel = document.getElementById("responsavel").value.trim();
 
-      if (!codigo) { alert("Informe o código do material."); return; }
-      if (quantidade < 1 || isNaN(quantidade)) { alert("Quantidade inválida."); return; }
-
-      carrinhoUso.push({codigo, descricao, quantidade, transacao, centro, solicitante, responsavel});
-      indiceEditandoUso = -1;
-      limparCamposUso();
-      renderizarCarrinho('uso');
-      toggleBotoes('uso', false);
-    }
-    else if (aba === 'transf') {
-      const origem = document.getElementById("origem").value.trim();
-      const destino = document.getElementById("destino").value.trim();
-      const codigo = document.getElementById("codigoTransf").value.trim();
-      const descricao = document.getElementById("descricaoTransf").value.trim();
-      const quantidade = parseInt(document.getElementById("quantidadeTransf").value);
-      const solicitante = document.getElementById("solicitanteTransf").value.trim();
-      const responsavel = document.getElementById("responsavelTransf").value.trim();
-
-      if (!origem || !destino) { alert("Informe origem e destino."); return; }
-      if (!codigo) { alert("Informe o código do material."); return; }
-      if (quantidade < 1 || isNaN(quantidade)) { alert("Quantidade inválida."); return; }
-
-      carrinhoTransf.push({origem, destino, codigo, descricao, quantidade, solicitante, responsavel});
-      indiceEditandoTransf = -1;
-      limparCamposTransf();
-      renderizarCarrinho('transf');
-      toggleBotoes('transf', false);
-    }
-  }
-
-  // Função para renderizar carrinho
-  function renderizarCarrinho(aba) {
-    let carrinhoArray, div;
-    if (aba === 'uso') {
-      carrinhoArray = carrinhoUso;
-      div = document.getElementById("carrinho-uso");
-    } else {
-      carrinhoArray = carrinhoTransf;
-      div = document.getElementById("carrinho-transf");
-    }
-    div.innerHTML = "<h3>Itens adicionados:</h3>";
-
-    if (carrinhoArray.length === 0) {
-      div.innerHTML += "<p>Nenhum item adicionado.</p>";
-      return;
-    }
-
-    carrinhoArray.forEach((item, i) => {
-      let infoHtml = "";
-      if(aba === 'uso'){
-        infoHtml = `
-          <div><strong>${item.codigo}</strong> - ${item.descricao} (Qtd: ${item.quantidade})</div>
-          <div><small>Transação: ${item.transacao} | Centro: ${item.centro} | Solicitante: ${item.solicitante} | Responsável: ${item.responsavel}</small></div>
-        `;
-      } else {
-        infoHtml = `
-          <div><strong>${item.codigo}</strong> - ${item.descricao} (Qtd: ${item.quantidade})</div>
-          <div><small>Origem: ${item.origem} | Destino: ${item.destino} | Solicitante: ${item.solicitante} | Responsável: ${item.responsavel}</small></div>
-        `;
+      if (!codigo || !descricao || descricao === "Produto não encontrado" || descricao === "Buscando..." || descricao === "Erro na busca" || !quantidade || quantidade < 1) {
+        alert("Preencha corretamente os dados do item.");
+        return;
       }
 
-      const el = document.createElement("div");
-      el.className = "carrinho-item";
-      el.innerHTML = infoHtml;
+      const item = { codigo, descricao, quantidade, transacao, centro, solicitante, responsavel };
 
-      const acoesDiv = document.createElement("div");
-      acoesDiv.className = "acoes";
+      if (editandoIndex >= 0) {
+        carrinho[editandoIndex] = item;
+        editandoIndex = -1;
+      } else {
+        carrinho.push(item);
+      }
 
-      const btnEditar = document.createElement("button");
-      btnEditar.textContent = "Editar";
-      btnEditar.onclick = () => editarItem(aba, i);
+      limparCamposItemUso();
+      preencherCamposPadraoUso();
+      renderizarCarrinho();
+    }
 
-      const btnExcluir = document.createElement("button");
-      btnExcluir.textContent = "Excluir";
-      btnExcluir.className = "excluir";
-      btnExcluir.onclick = () => excluirItem(aba, i);
+    function limparCamposItemUso() {
+      document.getElementById("codigo").value = "";
+      document.getElementById("descricao").value = "";
+      document.getElementById("quantidade").value = 1;
+      document.getElementById("codigo").focus();
+    }
 
-      acoesDiv.appendChild(btnEditar);
-      acoesDiv.appendChild(btnExcluir);
-      el.appendChild(acoesDiv);
-      div.appendChild(el);
-    });
-  }
+    function preencherCamposPadraoUso() {
+      if (carrinho.length === 0) return;
+      const ultimo = carrinho[carrinho.length - 1];
+      document.getElementById("transacao").value = ultimo.transacao;
+      document.getElementById("centro").value = ultimo.centro;
+      document.getElementById("solicitante").value = ultimo.solicitante;
+      document.getElementById("responsavel").value = ultimo.responsavel;
+    }
 
-  // Função para editar item do carrinho
-  function editarItem(aba, indice) {
-    if (aba === 'uso') {
-      const item = carrinhoUso[indice];
+    function renderizarCarrinho() {
+      const div = document.getElementById("carrinho");
+      div.innerHTML = "<h3>Itens adicionados:</h3>";
+      carrinho.forEach((item, i) => {
+        const el = document.createElement("div");
+        el.className = "carrinho-item";
+        el.innerHTML = `
+          <div><strong>${item.codigo}</strong> - ${item.descricao} (Qtd: ${item.quantidade})</div>
+          <div><small>Transação: ${item.transacao} | Centro: ${item.centro} | Solicitante: ${item.solicitante} | Responsável: ${item.responsavel}</small></div>
+          <div class="acoes">
+            <button onclick="editarItem(${i})" title="Editar">📝</button>
+            <button class="excluir" onclick="excluirItem(${i})" title="Excluir">🗑️</button>
+          </div>
+        `;
+        div.appendChild(el);
+      });
+    }
+
+    function editarItem(i) {
+      if (!confirm("Deseja editar este item?")) return;
+      const item = carrinho[i];
+      editandoIndex = i;
       document.getElementById("codigo").value = item.codigo;
       document.getElementById("descricao").value = item.descricao;
       document.getElementById("quantidade").value = item.quantidade;
@@ -437,149 +442,65 @@
       document.getElementById("centro").value = item.centro;
       document.getElementById("solicitante").value = item.solicitante;
       document.getElementById("responsavel").value = item.responsavel;
-
-      indiceEditandoUso = indice;
-      toggleBotoes('uso', true);
-    } else {
-      const item = carrinhoTransf[indice];
-      document.getElementById("origem").value = item.origem;
-      document.getElementById("destino").value = item.destino;
-      document.getElementById("codigoTransf").value = item.codigo;
-      document.getElementById("descricaoTransf").value = item.descricao;
-      document.getElementById("quantidadeTransf").value = item.quantidade;
-      document.getElementById("solicitanteTransf").value = item.solicitante;
-      document.getElementById("responsavelTransf").value = item.responsavel;
-
-      indiceEditandoTransf = indice;
-      toggleBotoes('transf', true);
+      document.getElementById("codigo").focus();
     }
-  }
 
-  // Função para excluir item do carrinho
-  function excluirItem(aba, indice) {
-    if (aba === 'uso') {
-      carrinhoUso.splice(indice, 1);
-      if (indiceEditandoUso === indice) {
-        limparCamposUso();
-        toggleBotoes('uso', false);
-        indiceEditandoUso = -1;
-      }
-      renderizarCarrinho('uso');
-    } else {
-      carrinhoTransf.splice(indice, 1);
-      if (indiceEditandoTransf === indice) {
-        limparCamposTransf();
-        toggleBotoes('transf', false);
-        indiceEditandoTransf = -1;
-      }
-      renderizarCarrinho('transf');
+    function excluirItem(i) {
+      if (!confirm("Deseja realmente excluir este item?")) return;
+      carrinho.splice(i, 1);
+      renderizarCarrinho();
     }
-  }
 
-  // Função para atualizar item editado
-  function atualizarItem(aba) {
-    if (aba === 'uso') {
-      if (indiceEditandoUso < 0) return;
-      const codigo = document.getElementById("codigo").value.trim();
-      const descricao = document.getElementById("descricao").value.trim();
-      const quantidade = parseInt(document.getElementById("quantidade").value);
-      const transacao = document.getElementById("transacao").value.trim();
-      const centro = document.getElementById("centro").value.trim();
-      const solicitante = document.getElementById("solicitante").value.trim();
-      const responsavel = document.getElementById("responsavel").value.trim();
+    function finalizarEntrega() {
+      if (carrinho.length === 0) {
+        alert("Adicione pelo menos um item antes de finalizar.");
+        return;
+      }
+      // Aqui você pode adicionar envio para o Google Sheets ou outra lógica que desejar
+      alert("Entrega finalizada!");
+      carrinho = [];
+      renderizarCarrinho();
+      // Limpa campos gerais
+      ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = (id === "quantidade") ? 1 : "";
+      });
+      editandoIndex = -1;
+      document.getElementById("codigo").focus();
+    }
 
-      if (!codigo) { alert("Informe o código do material."); return; }
-      if (quantidade < 1 || isNaN(quantidade)) { alert("Quantidade inválida."); return; }
+    // ----------- TRANSFERÊNCIA -----------
 
-      carrinhoUso[indiceEditandoUso] = {codigo, descricao, quantidade, transacao, centro, solicitante, responsavel};
-      indiceEditandoUso = -1;
-      limparCamposUso();
-      renderizarCarrinho('uso');
-      toggleBotoes('uso', false);
-    } else {
-      if (indiceEditandoTransf < 0) return;
+    async function buscarDescricaoTransf() {
+      await buscarDescricaoPorInput("codigoTransf");
+    }
+
+    document.getElementById("codigoTransf").addEventListener("blur", buscarDescricaoTransf);
+
+    function registrarTransferencia() {
       const origem = document.getElementById("origem").value.trim();
       const destino = document.getElementById("destino").value.trim();
+      const solicitante = document.getElementById("solicitanteTransf").value.trim();
+      const responsavel = document.getElementById("responsavelTransf").value.trim();
       const codigo = document.getElementById("codigoTransf").value.trim();
       const descricao = document.getElementById("descricaoTransf").value.trim();
       const quantidade = parseInt(document.getElementById("quantidadeTransf").value);
-      const solicitante = document.getElementById("solicitanteTransf").value.trim();
-      const responsavel = document.getElementById("responsavelTransf").value.trim();
 
-      if (!origem || !destino) { alert("Informe origem e destino."); return; }
-      if (!codigo) { alert("Informe o código do material."); return; }
-      if (quantidade < 1 || isNaN(quantidade)) { alert("Quantidade inválida."); return; }
+      if (!origem || !destino || !solicitante || !responsavel || !codigo || !descricao || descricao === "Produto não encontrado" || descricao === "Buscando..." || descricao === "Erro na busca" || !quantidade || quantidade < 1) {
+        alert("Preencha corretamente todos os campos da transferência.");
+        return;
+      }
 
-      carrinhoTransf[indiceEditandoTransf] = {origem, destino, codigo, descricao, quantidade, solicitante, responsavel};
-      indiceEditandoTransf = -1;
-      limparCamposTransf();
-      renderizarCarrinho('transf');
-      toggleBotoes('transf', false);
+      // Aqui você pode enviar os dados para a planilha, API, etc.
+      alert("Transferência registrada com sucesso!");
+
+      // Limpa campos
+      ["origem", "destino", "solicitanteTransf", "responsavelTransf", "codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = (id === "quantidadeTransf") ? 1 : "";
+      });
     }
-  }
+  </script>
 
-  // Limpar campos aba uso
-  function limparCamposUso() {
-    document.getElementById("codigo").value = "";
-    document.getElementById("descricao").value = "";
-    document.getElementById("quantidade").value = 1;
-    document.getElementById("transacao").value = "";
-    document.getElementById("centro").value = "";
-    document.getElementById("solicitante").value = "";
-    document.getElementById("responsavel").value = "";
-  }
-
-  // Limpar campos aba transferência
-  function limparCamposTransf() {
-    document.getElementById("origem").value = "";
-    document.getElementById("destino").value = "";
-    document.getElementById("codigoTransf").value = "";
-    document.getElementById("descricaoTransf").value = "";
-    document.getElementById("quantidadeTransf").value = 1;
-    document.getElementById("solicitanteTransf").value = "";
-    document.getElementById("responsavelTransf").value = "";
-  }
-
-  // Mostra ou esconde botões adicionar/atualizar conforme edição
-  function toggleBotoes(aba, editando) {
-    if (aba === 'uso') {
-      document.getElementById("btn-adicionar-uso").style.display = editando ? "none" : "block";
-      document.getElementById("btn-atualizar-uso").style.display = editando ? "block" : "none";
-    } else {
-      document.getElementById("btn-adicionar-transf").style.display = editando ? "none" : "block";
-      document.getElementById("btn-atualizar-transf").style.display = editando ? "block" : "none";
-    }
-  }
-
-  // Finalizar entrega (Uso Consumo)
-  function finalizarEntrega() {
-    if (carrinhoUso.length === 0) {
-      alert("Adicione pelo menos um item no carrinho.");
-      return;
-    }
-    alert("Entrega finalizada com sucesso!");
-    carrinhoUso = [];
-    renderizarCarrinho('uso');
-    limparCamposUso();
-    toggleBotoes('uso', false);
-  }
-
-  // Registrar transferência (Transferência)
-  function registrarTransferencia() {
-    if (carrinhoTransf.length === 0) {
-      alert("Adicione pelo menos um item no carrinho.");
-      return;
-    }
-    alert("Transferência registrada com sucesso!");
-    carrinhoTransf = [];
-    renderizarCarrinho('transf');
-    limparCamposTransf();
-    toggleBotoes('transf', false);
-  }
-
-  // Renderiza ao abrir para garantir visualização correta
-  renderizarCarrinho('uso');
-  renderizarCarrinho('transf');
-</script>
 </body>
 </html>
