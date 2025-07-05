@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Entrega de Materiais</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      margin: 15px;
+      margin: 10px;
       padding: 0;
       background: #f9f9f9;
     }
@@ -18,23 +22,6 @@
       margin-bottom: 20px;
     }
 
-    .linha {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .linha input {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-    }
-
-    .linha button {
-      padding: 10px;
-      font-size: 18px;
-    }
-
     label {
       font-weight: bold;
       display: block;
@@ -42,16 +29,49 @@
       margin-bottom: 5px;
     }
 
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      max-width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .linha {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .linha input {
+      flex: 1;
+    }
+
+    .linha button {
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 5px;
+      border: none;
+      background-color: #ccc;
+      color: #000;
+    }
+
     .quantidade-control {
       display: flex;
       gap: 5px;
       align-items: center;
+      margin-top: 5px;
     }
 
     .quantidade-control button {
       width: 30px;
       height: 30px;
       font-size: 20px;
+      border-radius: 5px;
+      border: none;
+      background-color: #eee;
     }
 
     .carrinho {
@@ -74,6 +94,7 @@
       padding: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      display: none;
     }
 
     .finalizar input {
@@ -81,6 +102,8 @@
       padding: 10px;
       margin-top: 5px;
       margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
 
     .btn-principal {
@@ -103,7 +126,7 @@
   <label>Código de barras ou manual:</label>
   <div class="linha">
     <input type="text" id="codigo" placeholder="Código de barras">
-    <button disabled>📷</button> <!-- Leitura futura -->
+    <button disabled>📷</button> <!-- Scanner em breve -->
   </div>
 
   <!-- Descrição -->
@@ -128,7 +151,7 @@
   </div>
 
   <!-- Campos finais -->
-  <div class="finalizar">
+  <div class="finalizar" id="finalizar">
     <label>Transação (3 caracteres):</label>
     <input type="text" maxlength="3">
 
@@ -165,8 +188,10 @@
       const item = document.createElement("div");
       item.className = "carrinho-item";
       item.innerText = `Código: ${codigo} | Descrição: ${descricao} | Quantidade: ${quantidade}`;
-
       document.getElementById("carrinho").appendChild(item);
+
+      // Mostrar área de finalização
+      document.getElementById("finalizar").style.display = "block";
 
       // Limpa campos
       document.getElementById("codigo").value = "";
