@@ -302,81 +302,40 @@
       document.getElementById("codigo").focus();
     }
 
-<!-- -------- Código para escanear código de barras pela câmera ---------- -->
+<input type="file" accept="image/*" capture="environment" id="fotoInput">
+
+<script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
 <script>
-  const btnScan = document.getElementById("btnScan");
-  const scannerDiv = document.getElementById("scanner");
+  const inputFoto = document.getElementById('fotoInput');
 
-  let scanner = null;
+  inputFoto.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  btnScan.addEventListener("click", () => {
-    if (scannerDiv.style.display === "none" || scannerDiv.style.display === "") {
-      iniciarScanner();
-    } else {
-      pararScanner();
-    }
-  });
+    const reader = new FileReader();
+    reader.onload = function() {
+      const dataUrl = reader.result;
 
-  function iniciarScanner() {
-    scannerDiv.style.display = "block";
-    btnScan.textContent = "❌";
-
-    if (!scanner) {
-      scanner = new Html5Qrcode("scanner");
-    }
-
-    Html5Qrcode.getCameras()
-      .then(cameras => {
-        if (cameras && cameras.length) {
-          // Tenta selecionar a câmera traseira
-          const backCamera = cameras.find(cam =>
-            cam.label.toLowerCase().includes("back") || cam.label.toLowerCase().includes("traseira")
-          );
-          const cameraId = backCamera ? backCamera.id : cameras[0].id;
-
-          scanner.start(
-            cameraId,
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 100 },
-              formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E,
-                Html5QrcodeSupportedFormats.CODE_39,
-              ]
-            },
-            (decodedText, decodedResult) => {
-              document.getElementById("codigo").value = decodedText;
-              buscarDescricao();
-              pararScanner();
-            },
-            (errorMessage) => {
-              // Ignorar erros contínuos de leitura
-            }
-          ).catch(err => {
-            alert("Erro ao abrir câmera: " + err);
-            pararScanner();
-          });
-        } else {
-          alert("Nenhuma câmera foi detectada.");
-          pararScanner();
+      Quagga.decodeSingle({
+        src: dataUrl,
+        numOfWorkers: 0,
+        inputStream: {
+          size: 800  // ajustar conforme necessidade
+        },
+        decoder: {
+          readers: ["ean_reader", "code_128_reader", "code_39_reader"]
         }
-      })
-      .catch(err => {
-        alert("Erro ao obter câmeras: " + err);
-        pararScanner();
+      }, function(result) {
+        if(result && result.codeResult) {
+          alert("Código lido: " + result.codeResult.code);
+          // aqui você pode preencher o input codigo e buscar descrição
+        } else {
+          alert("Não foi possível ler o código da imagem.");
+        }
       });
-  }
-
-  function pararScanner() {
-    btnScan.textContent = "📷";
-    scannerDiv.style.display = "none";
-    if (scanner) {
-      scanner.stop().catch(() => {});
-    }
-  }
+    };
+    reader.readAsDataURL(file);
+  });
 </script>
 </body>
 </html>
