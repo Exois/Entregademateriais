@@ -7,10 +7,10 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     :root {
-      --cor1: #A172EA;
-      --cor2: #D09AF4;
-      --cor3: #FFC1FF;
-      --cor-bg: linear-gradient(135deg, #724BDF, #D09AF4);
+      --cor1: #5F4B8B;
+      --cor2: #7286D3;
+      --cor3: #B8BFFF;
+      --cor-bg: linear-gradient(135deg, #5F4B8B, #7286D3);
       --text-color: white;
     }
     * { box-sizing: border-box; }
@@ -23,7 +23,12 @@
     }
     h1 {
       text-align: center;
-      margin-bottom: 15px;
+      margin: 10px 0;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 10px;
+      max-width: 180px;
     }
     .tabs {
       display: flex;
@@ -42,14 +47,11 @@
     }
     .tabs button.active {
       background: var(--cor3);
-      color: #8A2BE2;
+      color: #1f1f8b;
     }
-    .aba {
-      display: none;
-    }
-    .aba.active {
-      display: block;
-    }
+    .aba { display: none; }
+    .aba.active { display: block; }
+
     label {
       display: block;
       margin: 8px 0 4px;
@@ -59,7 +61,6 @@
     input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px;
-      border: none;
       border-radius: 8px;
       background: white;
       color: black;
@@ -72,13 +73,11 @@
       align-items: center;
       margin-top: 5px;
     }
-    .linha input {
-      flex: 1;
-    }
+    .linha input { flex: 1; }
     .linha button {
       padding: 10px;
       background: var(--cor3);
-      color: #8A2BE2;
+      color: #1f1f8b;
       font-size: 22px;
       border: none;
       border-radius: 8px;
@@ -92,7 +91,7 @@
     }
     .quantidade-control button {
       background: var(--cor3);
-      color: #8A2BE2;
+      color: #1f1f8b;
       border: none;
       border-radius: 8px;
       width: 40px;
@@ -102,7 +101,7 @@
     }
     .btn-principal {
       background: var(--cor3);
-      color: #8A2BE2;
+      color: #1f1f8b;
       padding: 14px;
       font-weight: bold;
       border: none;
@@ -121,7 +120,7 @@
       color: black;
     }
     .carrinho-item {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       padding: 10px;
       border-radius: 8px;
       margin-bottom: 8px;
@@ -170,24 +169,270 @@
   </style>
 </head>
 <body>
-  <!-- [todo o restante permanece igual até a função editarItemTransf abaixo] -->
+  <img src="cremer-logo.png" alt="Logo Cremer" class="logo" />
+  <h1>Entrega de Materiais</h1>
+
+  <div class="tabs">
+    <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
+    <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
+  </div>
+
+  <div id="aba-uso" class="aba active">
+    <label>Transação:</label>
+    <input type="text" id="transacao" maxlength="3">
+    <label>Centro de Custo:</label>
+    <input type="text" id="centro" maxlength="6">
+    <label>Solicitante:</label>
+    <input type="text" id="solicitante">
+    <label>Responsável:</label>
+    <input type="text" id="responsavel">
+    <label>Código:</label>
+    <div class="linha">
+      <input type="text" id="codigo" onblur="buscarDescricao('codigo', 'descricao')">
+      <button onclick="iniciarScanner('codigo', 'leitor-camera')">📷</button>
+    </div>
+    <div id="leitor-camera"></div>
+    <label>Descrição:</label>
+    <input type="text" id="descricao" readonly>
+    <label>Quantidade:</label>
+    <div class="quantidade-control">
+      <button onclick="alterarQtd('quantidade', -1)">−</button>
+      <input type="number" id="quantidade" value="1" min="1">
+      <button onclick="alterarQtd('quantidade', 1)">+</button>
+    </div>
+    <button class="btn-principal" onclick="adicionarItem()">Adicionar ao Carrinho</button>
+    <div class="carrinho" id="carrinho"></div>
+    <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
+  </div>
+
+  <div id="aba-transferencia" class="aba">
+    <label>Armazém de Origem:</label>
+    <input type="text" id="origem">
+    <label>Armazém de Destino:</label>
+    <input type="text" id="destino">
+    <label>Solicitante:</label>
+    <input type="text" id="solicitanteTransf">
+    <label>Responsável:</label>
+    <input type="text" id="responsavelTransf">
+    <label>Código:</label>
+    <div class="linha">
+      <input type="text" id="codigoTransf" onblur="buscarDescricao('codigoTransf', 'descricaoTransf')">
+      <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
+    </div>
+    <div id="leitor-camera-transferencia"></div>
+    <label>Descrição:</label>
+    <input type="text" id="descricaoTransf" readonly>
+    <label>Quantidade:</label>
+    <div class="quantidade-control">
+      <button onclick="alterarQtd('quantidadeTransf', -1)">−</button>
+      <input type="number" id="quantidadeTransf" value="1" min="1">
+      <button onclick="alterarQtd('quantidadeTransf', 1)">+</button>
+    </div>
+    <button class="btn-principal" onclick="adicionarItemTransf()">Adicionar ao Carrinho</button>
+    <div class="carrinho" id="carrinhoTransf"></div>
+    <button class="btn-principal" onclick="finalizarTransferencia()">Finalizar Transferência</button>
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
+    let carrinho = [];
+    let carrinhoTransf = [];
+
+    function mostrarAba(aba) {
+      document.querySelectorAll(".aba").forEach(d => d.classList.remove("active"));
+      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+      document.getElementById("aba-" + aba).classList.add("active");
+      document.getElementById("btn-" + aba).classList.add("active");
+    }
+
+    function alterarQtd(id, val) {
+      const input = document.getElementById(id);
+      input.value = Math.max(1, parseInt(input.value) + val);
+    }
+
+    async function buscarDescricao(codigoId, descricaoId) {
+      const codigo = document.getElementById(codigoId).value.trim();
+      if (!codigo) return document.getElementById(descricaoId).value = "";
+      document.getElementById(descricaoId).value = "Buscando...";
+      try {
+        const res = await fetch(`${API}?codigo=${encodeURIComponent(codigo)}`);
+        const json = await res.json();
+        document.getElementById(descricaoId).value = json.descricao || "Não encontrado";
+      } catch {
+        document.getElementById(descricaoId).value = "Erro";
+      }
+    }
+
+    function getVal(id) {
+      return document.getElementById(id)?.value?.trim();
+    }
+
+    function adicionarItem() {
+      const item = {
+        codigo: getVal("codigo"),
+        descricao: getVal("descricao"),
+        quantidade: getVal("quantidade"),
+        transacao: getVal("transacao"),
+        centro: getVal("centro"),
+        solicitante: getVal("solicitante"),
+        responsavel: getVal("responsavel")
+      };
+      if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
+        alert("Preencha todos os campos corretamente.");
+        return;
+      }
+      carrinho.push(item);
+      renderCarrinho();
+      ["codigo", "descricao", "quantidade"].forEach(id => document.getElementById(id).value = id === "quantidade" ? 1 : "");
+    }
+
+    function renderCarrinho() {
+      const div = document.getElementById("carrinho");
+      div.innerHTML = "<h3>Itens:</h3>";
+      carrinho.forEach((item, i) => {
+        div.innerHTML += `
+          <div class="carrinho-item">
+            <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
+            <small>${item.transacao} | ${item.centro} | ${item.solicitante} | ${item.responsavel}</small>
+            <div class="acoes">
+              <button onclick="editarItem(${i})">Editar</button>
+              <button class="excluir" onclick="excluirItem(${i})">Excluir</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function editarItem(i) {
+      const item = carrinho[i];
+      mostrarAba("uso");
+      Object.keys(item).forEach(id => {
+        if (document.getElementById(id)) document.getElementById(id).value = item[id];
+      });
+      carrinho.splice(i, 1);
+      renderCarrinho();
+    }
+
+    function excluirItem(i) {
+      carrinho.splice(i, 1);
+      renderCarrinho();
+    }
+
+    function adicionarItemTransf() {
+      const item = {
+        codigo: getVal("codigoTransf"),
+        descricao: getVal("descricaoTransf"),
+        quantidade: getVal("quantidadeTransf"),
+        origem: getVal("origem"),
+        destino: getVal("destino"),
+        solicitante: getVal("solicitanteTransf"),
+        responsavel: getVal("responsavelTransf")
+      };
+      if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
+        alert("Preencha todos os campos corretamente.");
+        return;
+      }
+      carrinhoTransf.push(item);
+      renderCarrinhoTransf();
+      ["codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => document.getElementById(id).value = id === "quantidadeTransf" ? 1 : "");
+    }
+
+    function renderCarrinhoTransf() {
+      const div = document.getElementById("carrinhoTransf");
+      div.innerHTML = "<h3>Itens:</h3>";
+      carrinhoTransf.forEach((item, i) => {
+        div.innerHTML += `
+          <div class="carrinho-item">
+            <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
+            <small>${item.origem} → ${item.destino} | ${item.solicitante} | ${item.responsavel}</small>
+            <div class="acoes">
+              <button onclick="editarItemTransf(${i})">Editar</button>
+              <button class="excluir" onclick="excluirItemTransf(${i})">Excluir</button>
+            </div>
+          </div>`;
+      });
+    }
 
     function editarItemTransf(i) {
       const item = carrinhoTransf[i];
-
       mostrarAba("transferencia");
-      document.getElementById("codigoTransf").value = item.codigo || "";
-      document.getElementById("descricaoTransf").value = item.descricao || "";
-      document.getElementById("quantidadeTransf").value = item.quantidade || 1;
-      document.getElementById("origem").value = item.origem || "";
-      document.getElementById("destino").value = item.destino || "";
-      document.getElementById("solicitanteTransf").value = item.solicitante || "";
-      document.getElementById("responsavelTransf").value = item.responsavel || "";
-
+      ["codigoTransf", "descricaoTransf", "quantidadeTransf", "origem", "destino", "solicitanteTransf", "responsavelTransf"].forEach(id => {
+        document.getElementById(id).value = item[id] || "";
+      });
       carrinhoTransf.splice(i, 1);
       renderCarrinhoTransf();
     }
 
-<!-- [todo o restante permanece igual] -->
+    function excluirItemTransf(i) {
+      carrinhoTransf.splice(i, 1);
+      renderCarrinhoTransf();
+    }
+
+    async function finalizarEntrega() {
+      if (carrinho.length === 0) return alert("Adicione ao menos um item.");
+      alert("Entrega finalizada com sucesso!");
+      carrinho = [];
+      renderCarrinho();
+      ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
+        document.getElementById(id).value = id === "quantidade" ? 1 : "";
+      });
+    }
+
+    async function finalizarTransferencia() {
+      if (carrinhoTransf.length === 0) return alert("Adicione ao menos um item.");
+      alert("Transferência finalizada com sucesso!");
+      carrinhoTransf = [];
+      renderCarrinhoTransf();
+      ["origem", "destino", "solicitanteTransf", "responsavelTransf", "codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => {
+        document.getElementById(id).value = id === "quantidadeTransf" ? 1 : "";
+      });
+    }
+
+    let scannerGlobal = null;
+    function iniciarScanner(inputId, divId) {
+      const div = document.getElementById(divId);
+      if (scannerGlobal) {
+        scannerGlobal.stop().catch(() => {}).finally(() => {
+          div.innerHTML = "";
+          div.style.display = "none";
+          scannerGlobal = null;
+          iniciarScanner(inputId, divId);
+        });
+        return;
+      }
+      div.style.display = "block";
+      div.innerHTML = `<button class="fechar-camera-btn" onclick="fecharScanner('${divId}')">X</button>`;
+      const scanner = new Html5Qrcode(divId);
+      scannerGlobal = scanner;
+      Html5Qrcode.getCameras().then(cameras => {
+        if (cameras.length === 0) return alert("Nenhuma câmera encontrada.");
+        const traseira = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira"));
+        const camId = traseira ? traseira.id : cameras[0].id;
+        scanner.start(camId, { fps: 10, qrbox: { width: 250, height: 100 } }, codigo => {
+          document.getElementById(inputId).value = codigo;
+          buscarDescricao(inputId, inputId.includes("Transf") ? "descricaoTransf" : "descricao");
+          scanner.stop().then(() => {
+            div.innerHTML = "";
+            div.style.display = "none";
+            scannerGlobal = null;
+          });
+        });
+      }).catch(() => alert("Erro ao acessar as câmeras."));
+    }
+
+    function fecharScanner(divId) {
+      const div = document.getElementById(divId);
+      if (scannerGlobal) {
+        scannerGlobal.stop().catch(() => {}).finally(() => {
+          div.innerHTML = "";
+          div.style.display = "none";
+          scannerGlobal = null;
+        });
+      } else {
+        div.innerHTML = "";
+        div.style.display = "none";
+      }
+    }
+  </script>
 </body>
 </html>
+``
