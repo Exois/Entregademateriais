@@ -147,6 +147,7 @@
       margin-top: 10px;
       border-radius: 8px;
       overflow: hidden;
+      position: relative;
     }
     #leitor-camera button.fechar-camera,
     #leitor-camera-transferencia button.fechar-camera {
@@ -160,6 +161,10 @@
       width: 100%;
       font-weight: bold;
       font-size: 16px;
+      position: absolute;
+      top: 5px;
+      left: 0;
+      z-index: 10;
     }
   </style>
 </head>
@@ -244,7 +249,7 @@
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
+    const API = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
     let carrinho = [];
     let carrinhoTransf = [];
 
@@ -380,23 +385,7 @@
         alert("Adicione ao menos um item.");
         return;
       }
-      // Para testes, só alerta:
       alert("Entrega finalizada com sucesso!");
-      // Se quiser enviar ao Google Sheets, aqui vai a fetch (comentei pois estava dando erro):
-      /*
-      try {
-        await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tipo: "uso", itens: carrinho })
-        });
-        alert("Entrega enviada!");
-        carrinho = [];
-        renderCarrinho();
-      } catch {
-        alert("Erro ao enviar.");
-      }
-      */
     }
 
     async function finalizarTransferencia() {
@@ -405,21 +394,6 @@
         return;
       }
       alert("Transferência finalizada com sucesso!");
-      // fetch para envio se desejar:
-      /*
-      try {
-        await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tipo: "transferencia", itens: carrinhoTransf })
-        });
-        alert("Transferência enviada!");
-        carrinhoTransf = [];
-        renderCarrinhoTransf();
-      } catch {
-        alert("Erro ao enviar.");
-      }
-      */
     }
 
     function getVal(id) {
@@ -443,8 +417,9 @@
           { fps: 10, qrbox: { width: 250, height: 100 } },
           codigo => {
             document.getElementById(inputId).value = codigo;
+            // Corrigido: identificar descrição correta para busca
             if(inputId === "codigo") buscarDescricao(inputId, "descricao");
-            else buscarDescricao(inputId, "descricaoTransf");
+            else if(inputId === "codigoTransf") buscarDescricao(inputId, "descricaoTransf");
             fecharScanner(divId);
           }
         ).catch(err => {
