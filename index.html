@@ -108,6 +108,16 @@
       height: 40px;
       font-size: 22px;
     }
+    /* Aumentei o botão do scanner */
+    .linha button {
+      width: 50px;
+      height: 50px;
+      font-size: 28px;
+      line-height: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
     .btn-principal {
       padding: 14px;
       font-weight: bold;
@@ -206,7 +216,7 @@
     <label>Código:</label>
     <div class="linha">
       <input type="text" id="codigo" onblur="buscarDescricao('codigo', 'descricao')" autocomplete="off" />
-      <button onclick="iniciarScanner('codigo', 'leitor-camera')">📷</button>
+      <button onclick="iniciarScanner('codigo', 'leitor-camera')" title="Abrir câmera para escanear">📷</button>
     </div>
     <div id="leitor-camera"></div>
     <label>Descrição:</label>
@@ -234,7 +244,7 @@
     <label>Código:</label>
     <div class="linha">
       <input type="text" id="codigoTransf" onblur="buscarDescricao('codigoTransf', 'descricaoTransf')" autocomplete="off" />
-      <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
+      <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')" title="Abrir câmera para escanear">📷</button>
     </div>
     <div id="leitor-camera-transferencia"></div>
     <label>Descrição:</label>
@@ -266,7 +276,7 @@
       fecharScanner("leitor-camera-transferencia");
     }
 
-    // Controla quantidade +/-
+    // Controla quantidade +/- nos inputs
     function alterarQtd(id, val) {
       const input = document.getElementById(id);
       input.value = Math.max(1, parseInt(input.value || "1") + val);
@@ -370,14 +380,27 @@
           return;
         }
       }
-      // Aqui você pode colocar o envio para a planilha, API ou o que for
-      alert("Entrega finalizada com sucesso!");
-
-      carrinhoUso = [];
-      renderCarrinhoUso();
-      ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
-        document.getElementById(id).value = (id === "quantidade") ? 1 : "";
-      });
+      // Envio para API/planilha aqui (exemplo abaixo)
+      try {
+        const resposta = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aba: "uso", itens: carrinhoUso })
+        });
+        const dados = await resposta.json();
+        if(dados.status === "ok") {
+          alert("Entrega finalizada com sucesso!");
+          carrinhoUso = [];
+          renderCarrinhoUso();
+          ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
+            document.getElementById(id).value = (id === "quantidade") ? 1 : "";
+          });
+        } else {
+          alert("Erro ao enviar: " + (dados.mensagem || "Erro desconhecido"));
+        }
+      } catch (e) {
+        alert("Erro ao enviar: " + e.message);
+      }
     }
 
     // -------------------- TRANSFERÊNCIA --------------------
@@ -462,22 +485,35 @@
           return;
         }
       }
-      // Aqui pode ser a integração para enviar os dados
-      alert("Transferência finalizada com sucesso!");
-
-      carrinhoTransf = [];
-      renderCarrinhoTransf();
-      [
-        "origemTransf",
-        "destinoTransf",
-        "solicitanteTransf",
-        "responsavelTransf",
-        "codigoTransf",
-        "descricaoTransf",
-        "quantidadeTransf"
-      ].forEach(id => {
-        document.getElementById(id).value = (id === "quantidadeTransf") ? 1 : "";
-      });
+      // Envio para API/planilha
+      try {
+        const resposta = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aba: "transferencia", itens: carrinhoTransf })
+        });
+        const dados = await resposta.json();
+        if(dados.status === "ok") {
+          alert("Transferência finalizada com sucesso!");
+          carrinhoTransf = [];
+          renderCarrinhoTransf();
+          [
+            "origemTransf",
+            "destinoTransf",
+            "solicitanteTransf",
+            "responsavelTransf",
+            "codigoTransf",
+            "descricaoTransf",
+            "quantidadeTransf"
+          ].forEach(id => {
+            document.getElementById(id).value = (id === "quantidadeTransf") ? 1 : "";
+          });
+        } else {
+          alert("Erro ao enviar: " + (dados.mensagem || "Erro desconhecido"));
+        }
+      } catch (e) {
+        alert("Erro ao enviar: " + e.message);
+      }
     }
 
     // -------------------- SCANNER --------------------
@@ -502,7 +538,7 @@
       `;
 
       if (html5QrCode) {
-        html5QrCode.stop().catch(()=>{}); // Para qualquer scanner anterior
+        html5QrCode.stop().catch(()=>{});
         html5QrCode.clear();
       }
       html5QrCode = new Html5Qrcode(`scanner-${leitorId}`);
@@ -553,7 +589,6 @@
     // Inicializa carrinhos vazios no carregamento
     renderCarrinhoUso();
     renderCarrinhoTransf();
-
   </script>
 </body>
 </html>
