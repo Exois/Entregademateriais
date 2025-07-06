@@ -10,7 +10,6 @@
       --cor1: #724BDF;
       --cor2: #D09AF4;
       --cor3: #FFC1FF;
-      --cor-error: #D93025;
     }
 
     body {
@@ -56,17 +55,16 @@
       display: block;
       margin-top: 10px;
       font-weight: bold;
-      color: black;
     }
 
     input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 8px;
-      background: transparent;
-      color: black;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
     }
 
     .linha {
@@ -118,17 +116,16 @@
 
     .carrinho {
       margin-top: 20px;
-      border-top: 1px solid black;
+      border-top: 1px solid white;
       padding-top: 10px;
-      color: black;
+      color: white;
     }
 
     .carrinho-item {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.1);
       padding: 10px;
       border-radius: 5px;
       margin-bottom: 8px;
-      color: black;
     }
 
     .acoes {
@@ -147,7 +144,7 @@
     }
 
     .acoes .excluir {
-      background-color: var(--cor-error);
+      background-color: #f44336;
     }
 
     #leitor-camera, #leitor-camera-transferencia {
@@ -158,10 +155,9 @@
     }
 
     input[readonly] {
-      background: #eee;
-      color: black;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
     }
-
   </style>
 </head>
 <body>
@@ -243,7 +239,7 @@
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv";
+    const API = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
 
     let carrinho = [];
 
@@ -270,18 +266,12 @@
       document.getElementById(descricaoId).value = "Buscando...";
       try {
         const res = await fetch(`${API}?codigo=${encodeURIComponent(codigo)}`);
-        if (!res.ok) throw new Error("Erro na requisição");
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const json = await res.json();
         document.getElementById(descricaoId).value = json.descricao || "Produto não encontrado";
-        if (!json.descricao) {
-          document.getElementById(descricaoId).style.color = "var(--cor-error)";
-        } else {
-          document.getElementById(descricaoId).style.color = "black";
-        }
       } catch (e) {
         console.error(e);
         document.getElementById(descricaoId).value = "Erro na busca";
-        document.getElementById(descricaoId).style.color = "var(--cor-error)";
       }
     }
 
@@ -325,12 +315,7 @@
     function editarItem(i) {
       const item = carrinho[i];
       Object.keys(item).forEach(id => {
-        if (document.getElementById(id)) {
-          document.getElementById(id).value = item[id];
-          if (id === "descricao") {
-            document.getElementById(id).style.color = "black";
-          }
-        }
+        if (document.getElementById(id)) document.getElementById(id).value = item[id];
       });
       carrinho.splice(i, 1);
       renderCarrinho();
