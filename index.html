@@ -7,33 +7,31 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     :root {
-      --cor1: #724BDF;
+      --cor1: #A172EA;
       --cor2: #D09AF4;
       --cor3: #FFC1FF;
+      --cor-bg: linear-gradient(135deg, #724BDF, #D09AF4);
     }
-
+    * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px 15px; /* ajuste para borda nas laterais */
-      background: linear-gradient(135deg, var(--cor1), var(--cor2));
-      color: black; /* texto preto conforme pedido */
+      padding: 10px 15px;
+      background: var(--cor-bg);
+      color: black;
+      min-height: 100vh;
     }
-
     h1 {
       text-align: center;
       margin-bottom: 20px;
       color: white;
-      text-shadow: 0 0 5px rgba(0,0,0,0.5);
     }
-
     .tabs {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
     }
-
     .tabs button {
       background: var(--cor2);
       color: white;
@@ -43,44 +41,32 @@
       border-radius: 8px;
       cursor: pointer;
     }
-
     .tabs button.active {
       background: var(--cor3);
       color: #8A2BE2;
     }
-
     .aba { display: none; }
     .aba.active { display: block; }
-
     label {
       display: block;
       margin-top: 10px;
       font-weight: bold;
-      color: black;
-      text-shadow: none;
     }
-
     input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 8px;
-      background: transparent;
+      background: rgba(255,255,255,0.6);
       color: black;
     }
-
     .linha {
       display: flex;
       gap: 5px;
       align-items: center;
       margin-top: 5px;
     }
-
-    .linha input[type="text"] {
-      flex-grow: 1;
-    }
-
     .linha button {
       padding: 10px;
       font-size: 20px;
@@ -88,16 +74,13 @@
       color: #8A2BE2;
       border: none;
       border-radius: 8px;
-      cursor: pointer;
     }
-
     .quantidade-control {
       display: flex;
       gap: 5px;
       align-items: center;
       margin-top: 5px;
     }
-
     .quantidade-control button {
       background: var(--cor3);
       color: #8A2BE2;
@@ -106,9 +89,7 @@
       width: 40px;
       height: 40px;
       font-size: 20px;
-      cursor: pointer;
     }
-
     .btn-principal {
       background: var(--cor3);
       color: #8A2BE2;
@@ -118,28 +99,21 @@
       border-radius: 8px;
       width: 100%;
       margin-top: 10px;
-      cursor: pointer;
     }
-
     .carrinho {
       margin-top: 20px;
       border-top: 1px solid white;
       padding-top: 10px;
-      color: black;
     }
-
     .carrinho-item {
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.2);
       padding: 10px;
       border-radius: 5px;
       margin-bottom: 8px;
-      color: black;
     }
-
     .acoes {
       margin-top: 5px;
     }
-
     .acoes button {
       background-color: #2196f3;
       color: white;
@@ -148,28 +122,25 @@
       border: none;
       border-radius: 5px;
       margin-right: 5px;
-      cursor: pointer;
     }
-
     .acoes .excluir {
       background-color: #f44336;
     }
-
     #leitor-camera, #leitor-camera-transferencia {
       display: none;
       margin-top: 10px;
+      color: white;
     }
   </style>
 </head>
 <body>
   <h1>Entrega de Materiais</h1>
-
   <div class="tabs">
     <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
     <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
   </div>
 
-  <!-- ABA USO -->
+  <!-- Abas uso e transferencia -->
   <div id="aba-uso" class="aba active">
     <label>Transação:</label>
     <input type="text" id="transacao" maxlength="3">
@@ -191,7 +162,7 @@
     <div id="leitor-camera"></div>
 
     <label>Descrição:</label>
-    <input type="text" id="descricao" readonly style="color:black; background: transparent;">
+    <input type="text" id="descricao" readonly>
 
     <label>Quantidade:</label>
     <div class="quantidade-control">
@@ -200,12 +171,11 @@
       <button onclick="alterarQtd('quantidade', 1)">+</button>
     </div>
 
-    <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
-
+    <button class="btn-principal" onclick="adicionarItem()">Adicionar ao Carrinho</button>
     <div class="carrinho" id="carrinho"></div>
+    <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
   </div>
 
-  <!-- ABA TRANSFERÊNCIA -->
   <div id="aba-transferencia" class="aba">
     <label>Armazém de Origem:</label>
     <input type="text" id="origem">
@@ -227,7 +197,7 @@
     <div id="leitor-camera-transferencia"></div>
 
     <label>Descrição:</label>
-    <input type="text" id="descricaoTransf" readonly style="color:black; background: transparent;">
+    <input type="text" id="descricaoTransf" readonly>
 
     <label>Quantidade:</label>
     <div class="quantidade-control">
@@ -240,8 +210,8 @@
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
-
+    const API_BUSCA = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
+    const API_ENVIO = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
     let carrinho = [];
 
     function mostrarAba(aba) {
@@ -258,13 +228,10 @@
 
     async function buscarDescricao(codigoId, descricaoId) {
       const codigo = document.getElementById(codigoId).value.trim();
-      if (!codigo) {
-        document.getElementById(descricaoId).value = "";
-        return;
-      }
+      if (!codigo) return;
       document.getElementById(descricaoId).value = "Buscando...";
       try {
-        const res = await fetch(`${API}?codigo=${encodeURIComponent(codigo)}`);
+        const res = await fetch(`${API_BUSCA}?codigo=${encodeURIComponent(codigo)}`);
         const json = await res.json();
         document.getElementById(descricaoId).value = json.descricao || "Não encontrado";
       } catch {
@@ -276,7 +243,6 @@
       return document.getElementById(id)?.value?.trim();
     }
 
-    // Adiciona item ao carrinho para aba Uso Consumo
     function adicionarItem() {
       const item = {
         codigo: getVal("codigo"),
@@ -300,7 +266,7 @@
 
     function renderCarrinho() {
       const div = document.getElementById("carrinho");
-      div.innerHTML = "<h3>Itens adicionados:</h3>";
+      div.innerHTML = "<h3>Itens:</h3>";
       carrinho.forEach((item, i) => {
         div.innerHTML += `
           <div class="carrinho-item">
@@ -312,6 +278,52 @@
             </div>
           </div>`;
       });
+    }
+
+    async function finalizarEntrega() {
+      if (carrinho.length === 0) return alert("Adicione ao menos um item.");
+      try {
+        await fetch(API_ENVIO, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tipo: "uso", itens: carrinho })
+        });
+        alert("Entrega enviada!");
+        carrinho = [];
+        renderCarrinho();
+      } catch {
+        alert("Erro ao enviar.");
+      }
+    }
+
+    async function registrarTransferencia() {
+      const dados = {
+        codigo: getVal("codigoTransf"),
+        descricao: getVal("descricaoTransf"),
+        quantidade: getVal("quantidadeTransf"),
+        origem: getVal("origem"),
+        destino: getVal("destino"),
+        solicitante: getVal("solicitanteTransf"),
+        responsavel: getVal("responsavelTransf")
+      };
+
+      if (Object.values(dados).some(v => !v || v === "Não encontrado" || v === "Erro")) {
+        alert("Preencha todos os campos.");
+        return;
+      }
+
+      try {
+        await fetch(API_ENVIO, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tipo: "transferencia", itens: [dados] })
+        });
+        alert("Transferência enviada!");
+        document.querySelectorAll("#aba-transferencia input").forEach(i => i.value = "");
+        document.getElementById("quantidadeTransf").value = 1;
+      } catch {
+        alert("Erro ao enviar.");
+      }
     }
 
     function editarItem(i) {
@@ -326,74 +338,6 @@
     function excluirItem(i) {
       carrinho.splice(i, 1);
       renderCarrinho();
-    }
-
-    async function finalizarEntrega() {
-      if (carrinho.length === 0) {
-        alert("Adicione ao menos um item.");
-        return;
-      }
-      const dataAtual = new Date().toLocaleString('pt-BR');
-      const dadosParaEnvio = carrinho.map(item => [
-        dataAtual,
-        item.codigo,
-        item.descricao,
-        item.quantidade,
-        item.transacao,
-        item.centro,
-        item.solicitante,
-        item.responsavel
-      ]);
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tipo: "uso", dados: dadosParaEnvio })
-        });
-        if (!res.ok) throw new Error("Erro no servidor");
-        alert("Entrega enviada!");
-        carrinho = [];
-        renderCarrinho();
-        ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = id === "quantidade" ? 1 : "";
-        });
-      } catch {
-        alert("Erro ao enviar.");
-      }
-    }
-
-    async function registrarTransferencia() {
-      const dataAtual = new Date().toLocaleString('pt-BR');
-      const dados = [
-        dataAtual,
-        getVal("codigoTransf"),
-        getVal("descricaoTransf"),
-        getVal("quantidadeTransf"),
-        getVal("origem"),
-        getVal("destino"),
-        getVal("solicitanteTransf"),
-        getVal("responsavelTransf")
-      ];
-
-      if (dados.some(v => !v || v === "Não encontrado" || v === "Erro")) {
-        alert("Preencha todos os campos corretamente.");
-        return;
-      }
-
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tipo: "transferencia", dados: [dados] })
-        });
-        if (!res.ok) throw new Error("Erro no servidor");
-        alert("Transferência enviada!");
-        document.querySelectorAll("#aba-transferencia input").forEach(i => i.value = "");
-        document.getElementById("quantidadeTransf").value = 1;
-      } catch {
-        alert("Erro ao enviar.");
-      }
     }
 
     function iniciarScanner(inputId, divId) {
@@ -416,8 +360,6 @@
             });
           }
         );
-      }).catch(() => {
-        alert("Câmera não encontrada ou erro ao acessar câmera.");
       });
     }
   </script>
