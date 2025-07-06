@@ -10,126 +10,76 @@
       --cor1: #A172EA;
       --cor2: #D09AF4;
       --cor3: #FFC1FF;
+      --cor-bg: linear-gradient(135deg, #724BDF, #D09AF4);
+      --text-color: white;
     }
-
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: linear-gradient(135deg, #724BDF, #D09AF4);
-      color: black;
+      margin: 0; padding: 10px;
+      background: var(--cor-bg);
+      color: var(--text-color);
+      min-height: 100vh;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    h1 { text-align: center; margin-bottom: 15px; }
     .tabs {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
+      display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;
     }
     .tabs button {
-      background: var(--cor2);
-      color: white;
-      font-weight: bold;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      background: var(--cor2); color: var(--text-color); font-weight: bold;
+      padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;
     }
-    .tabs button.active {
-      background: var(--cor3);
-      color: #8A2BE2;
-    }
-    .aba { display: none; max-width: 600px; margin: auto; }
+    .tabs button.active { background: var(--cor3); color: #8A2BE2; }
+    .aba { display: none; }
     .aba.active { display: block; }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
+    label { display: block; margin: 8px 0 4px; font-weight: bold; }
     input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background: #fff;
-      color: black;
+      width: 100%; padding: 10px; border: none; border-radius: 8px;
+      background: transparent; color: black; font-size: 16px; border: 1px solid #ccc;
     }
     .linha {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-      margin-top: 5px;
+      display: flex; gap: 5px; align-items: center; margin-top: 5px;
     }
+    .linha input { flex: 1; }
     .linha button {
-      padding: 10px;
-      font-size: 20px;
-      background: var(--cor3);
-      color: #8A2BE2;
-      border: none;
-      border-radius: 8px;
+      padding: 10px; background: var(--cor3); color: #8A2BE2;
+      font-size: 22px; border: none; border-radius: 8px; cursor: pointer;
     }
     .quantidade-control {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-      margin-top: 5px;
+      display: flex; align-items: center; gap: 5px; margin-top: 5px;
     }
     .quantidade-control button {
-      background: var(--cor3);
-      color: #8A2BE2;
-      border: none;
-      border-radius: 8px;
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
+      background: var(--cor3); color: #8A2BE2;
+      border: none; border-radius: 8px; width: 40px; height: 40px; font-size: 22px;
     }
     .btn-principal {
-      background: var(--cor3);
-      color: #8A2BE2;
-      padding: 12px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      width: 100%;
-      margin-top: 10px;
+      background: var(--cor3); color: #8A2BE2; padding: 14px;
+      font-weight: bold; border: none; border-radius: 8px; width: 100%;
+      margin-top: 12px; font-size: 16px;
     }
     .carrinho {
-      margin-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.5);
-      padding-top: 10px;
+      margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);
+      padding-top: 10px; max-height: 250px; overflow-y: auto;
     }
     .carrinho-item {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      color: black;
+      background: rgba(255, 255, 255, 0.15); padding: 10px; border-radius: 8px;
+      margin-bottom: 8px; color: #fff; position: relative;
+    }
+    .acoes {
+      position: absolute; right: 10px; top: 10px; display: flex; gap: 5px;
     }
     .acoes button {
-      background-color: #2196f3;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      margin-right: 5px;
+      background-color: #2196f3; color: white;
+      padding: 5px 10px; border: none; border-radius: 6px; cursor: pointer;
     }
-    .acoes .excluir {
-      background-color: #f44336;
-    }
+    .acoes .excluir { background-color: #f44336; }
     #leitor-camera, #leitor-camera-transferencia {
-      display: none;
-      margin-top: 10px;
+      display: none; margin-top: 10px; border-radius: 8px; overflow: hidden;
     }
   </style>
 </head>
 <body>
   <h1>Entrega de Materiais</h1>
-
   <div class="tabs">
     <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
     <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
@@ -138,33 +88,26 @@
   <div id="aba-uso" class="aba active">
     <label>Transação:</label>
     <input type="text" id="transacao" maxlength="3">
-
     <label>Centro de Custo:</label>
     <input type="text" id="centro" maxlength="6">
-
     <label>Solicitante:</label>
     <input type="text" id="solicitante">
-
     <label>Responsável:</label>
     <input type="text" id="responsavel">
-
     <label>Código:</label>
     <div class="linha">
       <input type="text" id="codigo" onblur="buscarDescricao('codigo', 'descricao')">
       <button onclick="iniciarScanner('codigo', 'leitor-camera')">📷</button>
     </div>
     <div id="leitor-camera"></div>
-
     <label>Descrição:</label>
-    <input type="text" id="descricao" readonly>
-
+    <input type="text" id="descricao" style="color:white;background-color:transparent;" readonly>
     <label>Quantidade:</label>
     <div class="quantidade-control">
       <button onclick="alterarQtd('quantidade', -1)">−</button>
       <input type="number" id="quantidade" value="1" min="1">
       <button onclick="alterarQtd('quantidade', 1)">+</button>
     </div>
-
     <button class="btn-principal" onclick="adicionarItem()">Adicionar ao Carrinho</button>
     <div class="carrinho" id="carrinho"></div>
     <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
@@ -173,43 +116,34 @@
   <div id="aba-transferencia" class="aba">
     <label>Armazém de Origem:</label>
     <input type="text" id="origem">
-
     <label>Armazém de Destino:</label>
     <input type="text" id="destino">
-
     <label>Solicitante:</label>
     <input type="text" id="solicitanteTransf">
-
     <label>Responsável:</label>
     <input type="text" id="responsavelTransf">
-
     <label>Código:</label>
     <div class="linha">
       <input type="text" id="codigoTransf" onblur="buscarDescricao('codigoTransf', 'descricaoTransf')">
       <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
     </div>
     <div id="leitor-camera-transferencia"></div>
-
     <label>Descrição:</label>
-    <input type="text" id="descricaoTransf" readonly>
-
+    <input type="text" id="descricaoTransf" style="color:white;background-color:transparent;" readonly>
     <label>Quantidade:</label>
     <div class="quantidade-control">
       <button onclick="alterarQtd('quantidadeTransf', -1)">−</button>
       <input type="number" id="quantidadeTransf" value="1" min="1">
       <button onclick="alterarQtd('quantidadeTransf', 1)">+</button>
     </div>
-
-    <button class="btn-principal" onclick="adicionarTransf()">Adicionar ao Carrinho</button>
+    <button class="btn-principal" onclick="adicionarTransferencia()">Adicionar ao Carrinho</button>
     <div class="carrinho" id="carrinhoTransf"></div>
-    <button class="btn-principal" onclick="finalizarTransferencia()">Registrar Transferência</button>
+    <button class="btn-principal" onclick="registrarTransferencia()">Registrar Transferência</button>
   </div>
 
   <script>
-    const API_BUSCA = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
-    const API_ENVIO = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
-    let carrinho = [];
-    let carrinhoTransf = [];
+    const API = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
+    let carrinho = [], carrinhoTransf = [];
 
     function mostrarAba(aba) {
       document.querySelectorAll(".aba").forEach(d => d.classList.remove("active"));
@@ -217,138 +151,133 @@
       document.getElementById("aba-" + aba).classList.add("active");
       document.getElementById("btn-" + aba).classList.add("active");
     }
-
     function alterarQtd(id, val) {
       const input = document.getElementById(id);
       input.value = Math.max(1, parseInt(input.value) + val);
     }
-
-    async function buscarDescricao(codigoId, descricaoId) {
-      const codigo = document.getElementById(codigoId).value.trim();
+    async function buscarDescricao(codId, descId) {
+      const codigo = document.getElementById(codId).value.trim();
       if (!codigo) return;
-      document.getElementById(descricaoId).value = "Buscando...";
       try {
-        const res = await fetch(`${API_BUSCA}?codigo=${encodeURIComponent(codigo)}`);
+        const res = await fetch(`${API}?codigo=${encodeURIComponent(codigo)}`);
         const json = await res.json();
-        document.getElementById(descricaoId).value = json.descricao || "Não encontrado";
+        document.getElementById(descId).value = json.descricao || "Não encontrado";
       } catch {
-        document.getElementById(descricaoId).value = "Erro";
+        document.getElementById(descId).value = "Erro";
       }
     }
-
     function getVal(id) {
       return document.getElementById(id)?.value?.trim();
     }
-
     function iniciarScanner(inputId, divId) {
       const div = document.getElementById(divId);
       div.style.display = "block";
       const scanner = new Html5Qrcode(divId);
       Html5Qrcode.getCameras().then(cameras => {
-        const traseira = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira"));
-        const camId = traseira ? traseira.id : cameras[0].id;
-        scanner.start(camId, { fps: 10, qrbox: { width: 250, height: 100 } }, codigo => {
-          document.getElementById(inputId).value = codigo;
+        const cam = cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
+        scanner.start(cam.id, { fps: 10, qrbox: { width: 250, height: 100 } }, code => {
+          document.getElementById(inputId).value = code;
           buscarDescricao(inputId, inputId === "codigo" ? "descricao" : "descricaoTransf");
           scanner.stop().then(() => { div.innerHTML = ""; div.style.display = "none"; });
         });
       });
     }
-
     function adicionarItem() {
       const item = {
-        codigo: getVal("codigo"),
-        descricao: getVal("descricao"),
-        quantidade: getVal("quantidade"),
-        transacao: getVal("transacao"),
-        centro: getVal("centro"),
-        solicitante: getVal("solicitante"),
-        responsavel: getVal("responsavel")
+        codigo: getVal("codigo"), descricao: getVal("descricao"), quantidade: getVal("quantidade"),
+        transacao: getVal("transacao"), centro: getVal("centro"), solicitante: getVal("solicitante"), responsavel: getVal("responsavel")
       };
-      if (Object.values(item).some(v => !v || v === "Não encontrado")) return alert("Preencha todos os campos.");
+      if (Object.values(item).some(v => !v || v === "Não encontrado")) return alert("Preencha todos os campos corretamente.");
       carrinho.push(item);
       renderCarrinho();
-      ["codigo", "descricao", "quantidade"].forEach(id => document.getElementById(id).value = id === "quantidade" ? 1 : "");
+      ["codigo", "descricao"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("quantidade").value = 1;
     }
-
-    function adicionarTransf() {
-      const item = {
-        codigo: getVal("codigoTransf"),
-        descricao: getVal("descricaoTransf"),
-        quantidade: getVal("quantidadeTransf"),
-        origem: getVal("origem"),
-        destino: getVal("destino"),
-        solicitante: getVal("solicitanteTransf"),
-        responsavel: getVal("responsavelTransf")
-      };
-      if (Object.values(item).some(v => !v || v === "Não encontrado")) return alert("Preencha todos os campos.");
-      carrinhoTransf.push(item);
-      renderCarrinhoTransf();
-      ["codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => document.getElementById(id).value = id === "quantidadeTransf" ? 1 : "");
-    }
-
     function renderCarrinho() {
       const div = document.getElementById("carrinho");
-      div.innerHTML = "<h3>Itens:</h3>";
-      carrinho.forEach((item, i) => {
-        div.innerHTML += `
-          <div class="carrinho-item">
-            <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
-            <small>${item.transacao} | ${item.centro} | ${item.solicitante} | ${item.responsavel}</small>
-            <div class="acoes">
-              <button onclick="excluirItem(${i})">Excluir</button>
-            </div>
-          </div>`;
-      });
+      div.innerHTML = "<h3>Itens:</h3>" + carrinho.map((item, i) => `
+        <div class='carrinho-item'>
+          <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
+          <small>${item.transacao} | ${item.centro} | ${item.solicitante} | ${item.responsavel}</small>
+          <div class='acoes'>
+            <button onclick='editarItem(${i})'>Editar</button>
+            <button class='excluir' onclick='excluirItem(${i})'>Excluir</button>
+          </div>
+        </div>`).join("");
     }
-
-    function renderCarrinhoTransf() {
-      const div = document.getElementById("carrinhoTransf");
-      div.innerHTML = "<h3>Itens:</h3>";
-      carrinhoTransf.forEach((item, i) => {
-        div.innerHTML += `
-          <div class="carrinho-item">
-            <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
-            <small>${item.origem} → ${item.destino} | ${item.solicitante} | ${item.responsavel}</small>
-            <div class="acoes">
-              <button onclick="excluirItemTransf(${i})">Excluir</button>
-            </div>
-          </div>`;
+    function editarItem(i) {
+      const item = carrinho[i];
+      Object.entries(item).forEach(([id, val]) => {
+        if (document.getElementById(id)) document.getElementById(id).value = val;
       });
+      carrinho.splice(i, 1);
+      renderCarrinho();
     }
-
-    function excluirItem(i) { carrinho.splice(i, 1); renderCarrinho(); }
-    function excluirItemTransf(i) { carrinhoTransf.splice(i, 1); renderCarrinhoTransf(); }
-
+    function excluirItem(i) {
+      carrinho.splice(i, 1);
+      renderCarrinho();
+    }
     async function finalizarEntrega() {
-      if (carrinho.length === 0) return alert("Adicione pelo menos um item.");
+      if (carrinho.length === 0) return alert("Adicione ao menos um item.");
       try {
-        await fetch(API_ENVIO, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        await fetch(API, {
+          method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tipo: "uso", itens: carrinho })
         });
-        alert("Entrega registrada com sucesso!");
+        alert("Entrega enviada!");
         carrinho = [];
         renderCarrinho();
-      } catch {
-        alert("Erro ao enviar os dados.");
+      } catch (e) {
+        alert("Erro ao enviar: " + e.message);
       }
     }
-
-    async function finalizarTransferencia() {
+    function adicionarTransferencia() {
+      const item = {
+        codigo: getVal("codigoTransf"), descricao: getVal("descricaoTransf"), quantidade: getVal("quantidadeTransf"),
+        origem: getVal("origem"), destino: getVal("destino"), solicitante: getVal("solicitanteTransf"), responsavel: getVal("responsavelTransf")
+      };
+      if (Object.values(item).some(v => !v || v === "Não encontrado")) return alert("Preencha todos os campos corretamente.");
+      carrinhoTransf.push(item);
+      renderCarrinhoTransferencia();
+      ["codigoTransf", "descricaoTransf"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("quantidadeTransf").value = 1;
+    }
+    function renderCarrinhoTransferencia() {
+      const div = document.getElementById("carrinhoTransf");
+      div.innerHTML = "<h3>Itens:</h3>" + carrinhoTransf.map((item, i) => `
+        <div class='carrinho-item'>
+          <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
+          <small>${item.origem} → ${item.destino} | ${item.solicitante} | ${item.responsavel}</small>
+          <div class='acoes'>
+            <button onclick='editarItemTransf(${i})'>Editar</button>
+            <button class='excluir' onclick='excluirItemTransf(${i})'>Excluir</button>
+          </div>
+        </div>`).join("");
+    }
+    function editarItemTransf(i) {
+      const item = carrinhoTransf[i];
+      Object.entries(item).forEach(([id, val]) => {
+        if (document.getElementById(id)) document.getElementById(id).value = val;
+      });
+      carrinhoTransf.splice(i, 1);
+      renderCarrinhoTransferencia();
+    }
+    function excluirItemTransf(i) {
+      carrinhoTransf.splice(i, 1);
+      renderCarrinhoTransferencia();
+    }
+    async function registrarTransferencia() {
       if (carrinhoTransf.length === 0) return alert("Adicione ao menos um item.");
       try {
-        await fetch(API_ENVIO, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        await fetch(API, {
+          method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tipo: "transferencia", itens: carrinhoTransf })
         });
-        alert("Transferência registrada com sucesso!");
+        alert("Transferência enviada!");
         carrinhoTransf = [];
-        renderCarrinhoTransf();
-      } catch {
-        alert("Erro ao enviar a transferência.");
+        renderCarrinhoTransferencia();
+      } catch (e) {
+        alert("Erro ao enviar: " + e.message);
       }
     }
   </script>
