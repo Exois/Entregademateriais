@@ -54,6 +54,7 @@
       display: block;
       margin: 8px 0 4px;
       font-weight: bold;
+      color: black;
     }
     input[type="text"], input[type="number"] {
       width: 100%;
@@ -97,6 +98,7 @@
       width: 40px;
       height: 40px;
       font-size: 22px;
+      cursor: pointer;
     }
     .btn-principal {
       background: var(--cor3);
@@ -108,20 +110,22 @@
       width: 100%;
       margin-top: 12px;
       font-size: 16px;
+      cursor: pointer;
     }
     .carrinho {
       margin-top: 15px;
-      border-top: 1px solid rgba(255,255,255,0.3);
+      border-top: 1px solid rgba(0,0,0,0.1);
       padding-top: 10px;
       max-height: 250px;
       overflow-y: auto;
-      color: #fff;
+      color: black;
     }
     .carrinho-item {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.85);
       padding: 10px;
       border-radius: 8px;
       margin-bottom: 8px;
+      color: black;
       position: relative;
     }
     .acoes {
@@ -149,21 +153,18 @@
       overflow: hidden;
       position: relative;
     }
-    #leitor-camera button.fechar-camera,
-    #leitor-camera-transferencia button.fechar-camera {
-      background:#f44336;
-      color:white;
-      border:none;
-      padding:5px 10px;
-      border-radius:5px;
-      cursor:pointer;
-      margin-bottom:5px;
-      width: 100%;
-      font-weight: bold;
-      font-size: 16px;
+    .fechar-camera-btn {
       position: absolute;
       top: 5px;
-      left: 0;
+      right: 5px;
+      background: rgba(255, 0, 0, 0.8);
+      border: none;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
       z-index: 10;
     }
   </style>
@@ -250,6 +251,7 @@
 
   <script>
     const API = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
+
     let carrinho = [];
     let carrinhoTransf = [];
 
@@ -267,7 +269,10 @@
 
     async function buscarDescricao(codigoId, descricaoId) {
       const codigo = document.getElementById(codigoId).value.trim();
-      if (!codigo) return;
+      if (!codigo) {
+        document.getElementById(descricaoId).value = "";
+        return;
+      }
       document.getElementById(descricaoId).value = "Buscando...";
       try {
         const res = await fetch(`${API}?codigo=${encodeURIComponent(codigo)}`);
@@ -289,7 +294,7 @@
         responsavel: getVal("responsavel")
       };
 
-      if (Object.values(item).some(v => !v || v === "Não encontrado")) {
+      if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
         alert("Preencha todos os campos corretamente.");
         return;
       }
@@ -340,14 +345,17 @@
         responsavel: getVal("responsavelTransf")
       };
 
-      if (Object.values(item).some(v => !v || v === "Não encontrado")) {
+      if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
         alert("Preencha todos os campos corretamente.");
         return;
       }
 
       carrinhoTransf.push(item);
       renderCarrinhoTransf();
-      ["codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => document.getElementById(id).value = id === "quantidadeTransf" ? 1 : "");
+      ["codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => {
+        if (id === "quantidadeTransf") document.getElementById(id).value = 1;
+        else document.getElementById(id).value = "";
+      });
     }
 
     function renderCarrinhoTransf() {
@@ -357,7 +365,7 @@
         div.innerHTML += `
           <div class="carrinho-item">
             <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
-            <small>${item.origem} | ${item.destino} | ${item.solicitante} | ${item.responsavel}</small>
+            <small>${item.origem} → ${item.destino} | ${item.solicitante} | ${item.responsavel}</small>
             <div class="acoes">
               <button onclick="editarItemTransf(${i})">Editar</button>
               <button class="excluir" onclick="excluirItemTransf(${i})">Excluir</button>
@@ -386,6 +394,14 @@
         return;
       }
       alert("Entrega finalizada com sucesso!");
+      carrinho = [];
+      renderCarrinho();
+      ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
+        if (document.getElementById(id)) {
+          if(id === "quantidade") document.getElementById(id).value = 1;
+          else document.getElementById(id).value = "";
+        }
+      });
     }
 
     async function finalizarTransferencia() {
@@ -394,22 +410,44 @@
         return;
       }
       alert("Transferência finalizada com sucesso!");
+      carrinhoTransf = [];
+      renderCarrinhoTransf();
+      ["origem", "destino", "solicitanteTransf", "responsavelTransf", "codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => {
+        if (document.getElementById(id)) {
+          if(id === "quantidadeTransf") document.getElementById(id).value = 1;
+          else document.getElementById(id).value = "";
+        }
+      });
     }
 
     function getVal(id) {
       return document.getElementById(id)?.value?.trim();
     }
 
+    let scannerGlobal = null;
+
     function iniciarScanner(inputId, divId) {
       const div = document.getElementById(divId);
+      if (scannerGlobal) {
+        scannerGlobal.stop().catch(() => {}).finally(() => {
+          div.innerHTML = "";
+          div.style.display = "none";
+          scannerGlobal = null;
+          iniciarScanner(inputId, divId);
+        });
+        return;
+      }
       div.style.display = "block";
-      div.innerHTML = `
-        <button class="fechar-camera" onclick="fecharScanner('${divId}')">Fechar câmera</button>
-      `;
-
+      div.innerHTML = `<button class="fechar-camera-btn" onclick="fecharScanner('${divId}')">X</button>`;
       const scanner = new Html5Qrcode(divId);
+      scannerGlobal = scanner;
 
       Html5Qrcode.getCameras().then(cameras => {
+        if (cameras.length === 0) {
+          alert("Nenhuma câmera encontrada.");
+          fecharScanner(divId);
+          return;
+        }
         const traseira = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira"));
         const camId = traseira ? traseira.id : cameras[0].id;
         scanner.start(
@@ -417,35 +455,34 @@
           { fps: 10, qrbox: { width: 250, height: 100 } },
           codigo => {
             document.getElementById(inputId).value = codigo;
-            // Corrigido: identificar descrição correta para busca
-            if(inputId === "codigo") buscarDescricao(inputId, "descricao");
-            else if(inputId === "codigoTransf") buscarDescricao(inputId, "descricaoTransf");
-            fecharScanner(divId);
+            const descricaoId = inputId === "codigo" ? "descricao" : "descricaoTransf";
+            buscarDescricao(inputId, descricaoId);
+            scanner.stop().then(() => {
+              div.innerHTML = "";
+              div.style.display = "none";
+              scannerGlobal = null;
+            });
+          },
+          errorMessage => {
+            // console.log(`Erro no scanner: ${errorMessage}`);
           }
         ).catch(err => {
-          alert("Erro ao iniciar câmera: " + err);
+          alert(`Erro ao iniciar o scanner: ${err}`);
           fecharScanner(divId);
         });
-
-        // Guarda scanner na div para controlar depois
-        div._scanner = scanner;
-      }).catch(err => {
-        alert("Nenhuma câmera encontrada: " + err);
+      }).catch(() => {
+        alert("Erro ao acessar as câmeras.");
         fecharScanner(divId);
       });
     }
 
     function fecharScanner(divId) {
       const div = document.getElementById(divId);
-      if (div._scanner) {
-        div._scanner.stop().then(() => {
+      if (scannerGlobal) {
+        scannerGlobal.stop().catch(() => {}).finally(() => {
           div.innerHTML = "";
           div.style.display = "none";
-          div._scanner = null;
-        }).catch(() => {
-          div.innerHTML = "";
-          div.style.display = "none";
-          div._scanner = null;
+          scannerGlobal = null;
         });
       } else {
         div.innerHTML = "";
