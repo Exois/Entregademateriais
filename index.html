@@ -308,8 +308,8 @@
       const div = document.getElementById("carrinho");
       div.innerHTML = "<h3>Itens:</h3>";
       carrinho.forEach((item, i) => {
-        div.innerHTML += `
-          <div class="carrinho-item">
+        div.innerHTML += 
+          `<div class="carrinho-item">
             <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
             <small>${item.transacao} | ${item.centro} | ${item.solicitante} | ${item.responsavel}</small>
             <div class="acoes">
@@ -362,8 +362,8 @@
       const div = document.getElementById("carrinhoTransf");
       div.innerHTML = "<h3>Itens:</h3>";
       carrinhoTransf.forEach((item, i) => {
-        div.innerHTML += `
-          <div class="carrinho-item">
+        div.innerHTML += 
+          `<div class="carrinho-item">
             <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
             <small>${item.origem} → ${item.destino} | ${item.solicitante} | ${item.responsavel}</small>
             <div class="acoes">
@@ -376,9 +376,15 @@
 
     function editarItemTransf(i) {
       const item = carrinhoTransf[i];
-      Object.keys(item).forEach(id => {
-        if (document.getElementById(id)) document.getElementById(id).value = item[id];
-      });
+
+      document.getElementById("codigoTransf").value = item.codigo || "";
+      document.getElementById("descricaoTransf").value = item.descricao || "";
+      document.getElementById("quantidadeTransf").value = item.quantidade || 1;
+      document.getElementById("origem").value = item.origem || "";
+      document.getElementById("destino").value = item.destino || "";
+      document.getElementById("solicitanteTransf").value = item.solicitante || "";
+      document.getElementById("responsavelTransf").value = item.responsavel || "";
+
       carrinhoTransf.splice(i, 1);
       renderCarrinhoTransf();
     }
