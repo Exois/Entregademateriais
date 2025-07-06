@@ -10,21 +10,19 @@
       --cor1: #A172EA;
       --cor2: #D09AF4;
       --cor3: #FFC1FF;
-      --cor-bg: linear-gradient(135deg, #724BDF, #D09AF4);
     }
+
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 10px 15px;
-      background: var(--cor-bg);
+      padding: 20px;
+      background: linear-gradient(135deg, #724BDF, #D09AF4);
       color: black;
-      min-height: 100vh;
     }
     h1 {
       text-align: center;
       margin-bottom: 20px;
-      color: white;
     }
     .tabs {
       display: flex;
@@ -45,7 +43,7 @@
       background: var(--cor3);
       color: #8A2BE2;
     }
-    .aba { display: none; }
+    .aba { display: none; max-width: 600px; margin: auto; }
     .aba.active { display: block; }
     label {
       display: block;
@@ -58,7 +56,7 @@
       font-size: 16px;
       border: none;
       border-radius: 8px;
-      background: rgba(255,255,255,0.6);
+      background: #fff;
       color: black;
     }
     .linha {
@@ -102,23 +100,20 @@
     }
     .carrinho {
       margin-top: 20px;
-      border-top: 1px solid white;
+      border-top: 1px solid rgba(255,255,255,0.5);
       padding-top: 10px;
     }
     .carrinho-item {
       background: rgba(255, 255, 255, 0.2);
       padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 8px;
-    }
-    .acoes {
-      margin-top: 5px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      color: black;
     }
     .acoes button {
       background-color: #2196f3;
       color: white;
       padding: 5px 10px;
-      font-size: 14px;
       border: none;
       border-radius: 5px;
       margin-right: 5px;
@@ -129,18 +124,17 @@
     #leitor-camera, #leitor-camera-transferencia {
       display: none;
       margin-top: 10px;
-      color: white;
     }
   </style>
 </head>
 <body>
   <h1>Entrega de Materiais</h1>
+
   <div class="tabs">
     <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
     <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
   </div>
 
-  <!-- Abas uso e transferencia -->
   <div id="aba-uso" class="aba active">
     <label>Transação:</label>
     <input type="text" id="transacao" maxlength="3">
@@ -206,13 +200,16 @@
       <button onclick="alterarQtd('quantidadeTransf', 1)">+</button>
     </div>
 
-    <button class="btn-principal" onclick="registrarTransferencia()">Registrar Transferência</button>
+    <button class="btn-principal" onclick="adicionarTransf()">Adicionar ao Carrinho</button>
+    <div class="carrinho" id="carrinhoTransf"></div>
+    <button class="btn-principal" onclick="finalizarTransferencia()">Registrar Transferência</button>
   </div>
 
   <script>
     const API_BUSCA = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
     const API_ENVIO = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
     let carrinho = [];
+    let carrinhoTransf = [];
 
     function mostrarAba(aba) {
       document.querySelectorAll(".aba").forEach(d => d.classList.remove("active"));
@@ -243,6 +240,21 @@
       return document.getElementById(id)?.value?.trim();
     }
 
+    function iniciarScanner(inputId, divId) {
+      const div = document.getElementById(divId);
+      div.style.display = "block";
+      const scanner = new Html5Qrcode(divId);
+      Html5Qrcode.getCameras().then(cameras => {
+        const traseira = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira"));
+        const camId = traseira ? traseira.id : cameras[0].id;
+        scanner.start(camId, { fps: 10, qrbox: { width: 250, height: 100 } }, codigo => {
+          document.getElementById(inputId).value = codigo;
+          buscarDescricao(inputId, inputId === "codigo" ? "descricao" : "descricaoTransf");
+          scanner.stop().then(() => { div.innerHTML = ""; div.style.display = "none"; });
+        });
+      });
+    }
+
     function adicionarItem() {
       const item = {
         codigo: getVal("codigo"),
@@ -253,15 +265,26 @@
         solicitante: getVal("solicitante"),
         responsavel: getVal("responsavel")
       };
-
-      if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
-        alert("Preencha todos os campos corretamente.");
-        return;
-      }
-
+      if (Object.values(item).some(v => !v || v === "Não encontrado")) return alert("Preencha todos os campos.");
       carrinho.push(item);
       renderCarrinho();
       ["codigo", "descricao", "quantidade"].forEach(id => document.getElementById(id).value = id === "quantidade" ? 1 : "");
+    }
+
+    function adicionarTransf() {
+      const item = {
+        codigo: getVal("codigoTransf"),
+        descricao: getVal("descricaoTransf"),
+        quantidade: getVal("quantidadeTransf"),
+        origem: getVal("origem"),
+        destino: getVal("destino"),
+        solicitante: getVal("solicitanteTransf"),
+        responsavel: getVal("responsavelTransf")
+      };
+      if (Object.values(item).some(v => !v || v === "Não encontrado")) return alert("Preencha todos os campos.");
+      carrinhoTransf.push(item);
+      renderCarrinhoTransf();
+      ["codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => document.getElementById(id).value = id === "quantidadeTransf" ? 1 : "");
     }
 
     function renderCarrinho() {
@@ -273,94 +296,60 @@
             <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
             <small>${item.transacao} | ${item.centro} | ${item.solicitante} | ${item.responsavel}</small>
             <div class="acoes">
-              <button onclick="editarItem(${i})">Editar</button>
-              <button class="excluir" onclick="excluirItem(${i})">Excluir</button>
+              <button onclick="excluirItem(${i})">Excluir</button>
             </div>
           </div>`;
       });
     }
 
+    function renderCarrinhoTransf() {
+      const div = document.getElementById("carrinhoTransf");
+      div.innerHTML = "<h3>Itens:</h3>";
+      carrinhoTransf.forEach((item, i) => {
+        div.innerHTML += `
+          <div class="carrinho-item">
+            <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
+            <small>${item.origem} → ${item.destino} | ${item.solicitante} | ${item.responsavel}</small>
+            <div class="acoes">
+              <button onclick="excluirItemTransf(${i})">Excluir</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function excluirItem(i) { carrinho.splice(i, 1); renderCarrinho(); }
+    function excluirItemTransf(i) { carrinhoTransf.splice(i, 1); renderCarrinhoTransf(); }
+
     async function finalizarEntrega() {
-      if (carrinho.length === 0) return alert("Adicione ao menos um item.");
+      if (carrinho.length === 0) return alert("Adicione pelo menos um item.");
       try {
         await fetch(API_ENVIO, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tipo: "uso", itens: carrinho })
         });
-        alert("Entrega enviada!");
+        alert("Entrega registrada com sucesso!");
         carrinho = [];
         renderCarrinho();
       } catch {
-        alert("Erro ao enviar.");
+        alert("Erro ao enviar os dados.");
       }
     }
 
-    async function registrarTransferencia() {
-      const dados = {
-        codigo: getVal("codigoTransf"),
-        descricao: getVal("descricaoTransf"),
-        quantidade: getVal("quantidadeTransf"),
-        origem: getVal("origem"),
-        destino: getVal("destino"),
-        solicitante: getVal("solicitanteTransf"),
-        responsavel: getVal("responsavelTransf")
-      };
-
-      if (Object.values(dados).some(v => !v || v === "Não encontrado" || v === "Erro")) {
-        alert("Preencha todos os campos.");
-        return;
-      }
-
+    async function finalizarTransferencia() {
+      if (carrinhoTransf.length === 0) return alert("Adicione ao menos um item.");
       try {
         await fetch(API_ENVIO, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tipo: "transferencia", itens: [dados] })
+          body: JSON.stringify({ tipo: "transferencia", itens: carrinhoTransf })
         });
-        alert("Transferência enviada!");
-        document.querySelectorAll("#aba-transferencia input").forEach(i => i.value = "");
-        document.getElementById("quantidadeTransf").value = 1;
+        alert("Transferência registrada com sucesso!");
+        carrinhoTransf = [];
+        renderCarrinhoTransf();
       } catch {
-        alert("Erro ao enviar.");
+        alert("Erro ao enviar a transferência.");
       }
-    }
-
-    function editarItem(i) {
-      const item = carrinho[i];
-      Object.keys(item).forEach(id => {
-        if (document.getElementById(id)) document.getElementById(id).value = item[id];
-      });
-      carrinho.splice(i, 1);
-      renderCarrinho();
-    }
-
-    function excluirItem(i) {
-      carrinho.splice(i, 1);
-      renderCarrinho();
-    }
-
-    function iniciarScanner(inputId, divId) {
-      const div = document.getElementById(divId);
-      div.style.display = "block";
-      const scanner = new Html5Qrcode(divId);
-
-      Html5Qrcode.getCameras().then(cameras => {
-        const traseira = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira"));
-        const camId = traseira ? traseira.id : cameras[0].id;
-        scanner.start(
-          camId,
-          { fps: 10, qrbox: { width: 250, height: 100 } },
-          codigo => {
-            document.getElementById(inputId).value = codigo;
-            buscarDescricao(inputId, inputId === "codigo" ? "descricao" : "descricaoTransf");
-            scanner.stop().then(() => {
-              div.innerHTML = "";
-              div.style.display = "none";
-            });
-          }
-        );
-      });
     }
   </script>
 </body>
