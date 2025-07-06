@@ -108,16 +108,6 @@
       height: 40px;
       font-size: 22px;
     }
-    /* Aumentei o botão do scanner */
-    .linha button {
-      width: 50px;
-      height: 50px;
-      font-size: 28px;
-      line-height: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
     .btn-principal {
       padding: 14px;
       font-weight: bold;
@@ -193,6 +183,15 @@
       cursor: pointer;
       z-index: 10;
     }
+    /* Aumentar ícone do botão scanner */
+    .linha button {
+      font-size: 26px;
+      width: 48px;
+      height: 48px;
+      line-height: 44px;
+      padding: 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -216,7 +215,7 @@
     <label>Código:</label>
     <div class="linha">
       <input type="text" id="codigo" onblur="buscarDescricao('codigo', 'descricao')" autocomplete="off" />
-      <button onclick="iniciarScanner('codigo', 'leitor-camera')" title="Abrir câmera para escanear">📷</button>
+      <button onclick="iniciarScanner('codigo', 'leitor-camera')">📷</button>
     </div>
     <div id="leitor-camera"></div>
     <label>Descrição:</label>
@@ -244,7 +243,7 @@
     <label>Código:</label>
     <div class="linha">
       <input type="text" id="codigoTransf" onblur="buscarDescricao('codigoTransf', 'descricaoTransf')" autocomplete="off" />
-      <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')" title="Abrir câmera para escanear">📷</button>
+      <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
     </div>
     <div id="leitor-camera-transferencia"></div>
     <label>Descrição:</label>
@@ -261,7 +260,8 @@
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
+    const URL_BUSCA_DESCRICAO = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
+    const URL_ENVIO_DADOS = "https://script.google.com/macros/s/AKfycbx8tfeEdex4WEvLLei88Hx5DdCus1ffL6NPXzyijX-5GsiTW36KKxmakkhP4wiYmpg3mA/exec";
 
     let carrinhoUso = [];
     let carrinhoTransf = [];
@@ -276,7 +276,7 @@
       fecharScanner("leitor-camera-transferencia");
     }
 
-    // Controla quantidade +/- nos inputs
+    // Controla quantidade +/- botão
     function alterarQtd(id, val) {
       const input = document.getElementById(id);
       input.value = Math.max(1, parseInt(input.value || "1") + val);
@@ -291,7 +291,7 @@
       }
       document.getElementById(descricaoId).value = "Buscando...";
       try {
-        const res = await fetch(`${API}?codigo=${encodeURIComponent(codigo)}`);
+        const res = await fetch(`${URL_BUSCA_DESCRICAO}?codigo=${encodeURIComponent(codigo)}`);
         const json = await res.json();
         document.getElementById(descricaoId).value = json.descricao || "Não encontrado";
       } catch {
@@ -304,7 +304,7 @@
       return document.getElementById(id)?.value?.trim();
     }
 
-    // -------------------- USO CONSUMO --------------------
+    // --------- USO CONSUMO ---------
 
     function adicionarItemUso() {
       const item = {
@@ -316,14 +316,12 @@
         solicitante: getVal("solicitante"),
         responsavel: getVal("responsavel")
       };
-      // Verifica campos vazios ou erro/nao encontrado
       if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
         alert("Preencha todos os campos corretamente.");
         return;
       }
       carrinhoUso.push(item);
       renderCarrinhoUso();
-      // Limpa código, descrição e reseta quantidade
       ["codigo", "descricao", "quantidade"].forEach(id => {
         document.getElementById(id).value = (id === "quantidade") ? 1 : "";
       });
@@ -354,7 +352,9 @@
       const item = carrinhoUso[i];
       mostrarAba("uso");
       Object.keys(item).forEach(id => {
-        if (document.getElementById(id)) document.getElementById(id).value = item[id];
+        if (document.getElementById(id)) {
+          document.getElementById(id).value = item[id];
+        }
       });
       carrinhoUso.splice(i, 1);
       renderCarrinhoUso();
@@ -370,7 +370,6 @@
         alert("Adicione ao menos um item.");
         return;
       }
-      // Validação campos obrigatórios gerais (exceto quantidade e código que já foi validado no add)
       const camposObrigatorios = ["transacao", "centro", "solicitante", "responsavel"];
       for (const campo of camposObrigatorios) {
         if (!getVal(campo)) {
@@ -380,30 +379,20 @@
           return;
         }
       }
-      // Envio para API/planilha aqui (exemplo abaixo)
       try {
-        const resposta = await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ aba: "uso", itens: carrinhoUso })
+        await enviarDados("UsoConsumo", carrinhoUso);
+        alert("Entrega finalizada com sucesso!");
+        carrinhoUso = [];
+        renderCarrinhoUso();
+        ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
+          document.getElementById(id).value = (id === "quantidade") ? 1 : "";
         });
-        const dados = await resposta.json();
-        if(dados.status === "ok") {
-          alert("Entrega finalizada com sucesso!");
-          carrinhoUso = [];
-          renderCarrinhoUso();
-          ["transacao", "centro", "solicitante", "responsavel", "codigo", "descricao", "quantidade"].forEach(id => {
-            document.getElementById(id).value = (id === "quantidade") ? 1 : "";
-          });
-        } else {
-          alert("Erro ao enviar: " + (dados.mensagem || "Erro desconhecido"));
-        }
-      } catch (e) {
-        alert("Erro ao enviar: " + e.message);
+      } catch (err) {
+        alert("Erro ao enviar: " + err.message);
       }
     }
 
-    // -------------------- TRANSFERÊNCIA --------------------
+    // --------- TRANSFERÊNCIA ---------
 
     function adicionarItemTransf() {
       const item = {
@@ -475,120 +464,109 @@
         alert("Adicione ao menos um item.");
         return;
       }
-      // Validação campos obrigatórios
       const camposObrigatorios = ["origemTransf", "destinoTransf", "solicitanteTransf", "responsavelTransf"];
       for (const campo of camposObrigatorios) {
         if (!getVal(campo)) {
-          alert(`Preencha o campo ${campo.replace("Transf","").replace(/^\w/, c => c.toUpperCase())}.`);
+          alert(`Preencha o campo ${campo.replace("Transf", "").charAt(0).toUpperCase() + campo.replace("Transf", "").slice(1)}.`);
           mostrarAba("transferencia");
           document.getElementById(campo).focus();
           return;
         }
       }
-      // Envio para API/planilha
       try {
-        const resposta = await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ aba: "transferencia", itens: carrinhoTransf })
+        // Prepara dados para envio padronizado (removendo sufixos Transf)
+        const dadosParaEnvio = carrinhoTransf.map(item => ({
+          codigo: item.codigoTransf,
+          descricao: item.descricaoTransf,
+          quantidade: item.quantidadeTransf,
+          origem: item.origemTransf,
+          destino: item.destinoTransf,
+          solicitante: item.solicitanteTransf,
+          responsavel: item.responsavelTransf
+        }));
+        await enviarDados("Transferencia", dadosParaEnvio);
+        alert("Transferência finalizada com sucesso!");
+        carrinhoTransf = [];
+        renderCarrinhoTransf();
+        ["origemTransf", "destinoTransf", "solicitanteTransf", "responsavelTransf", "codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => {
+          document.getElementById(id).value = (id === "quantidadeTransf") ? 1 : "";
         });
-        const dados = await resposta.json();
-        if(dados.status === "ok") {
-          alert("Transferência finalizada com sucesso!");
-          carrinhoTransf = [];
-          renderCarrinhoTransf();
-          [
-            "origemTransf",
-            "destinoTransf",
-            "solicitanteTransf",
-            "responsavelTransf",
-            "codigoTransf",
-            "descricaoTransf",
-            "quantidadeTransf"
-          ].forEach(id => {
-            document.getElementById(id).value = (id === "quantidadeTransf") ? 1 : "";
-          });
-        } else {
-          alert("Erro ao enviar: " + (dados.mensagem || "Erro desconhecido"));
-        }
-      } catch (e) {
-        alert("Erro ao enviar: " + e.message);
+      } catch (err) {
+        alert("Erro ao enviar: " + err.message);
       }
     }
 
-    // -------------------- SCANNER --------------------
+    // --------- ENVIAR DADOS ---------
 
-    let html5QrCode;
-    let cameraAtiva = null;
-
-    function iniciarScanner(inputId, leitorId) {
-      if (cameraAtiva) {
-        fecharScanner(cameraAtiva);
-        if (cameraAtiva === leitorId) {
-          // Se clicou no mesmo, apenas fecha
-          return;
-        }
-      }
-      cameraAtiva = leitorId;
-      const leitor = document.getElementById(leitorId);
-      leitor.style.display = "block";
-      leitor.innerHTML = `
-        <button class="fechar-camera-btn" onclick="fecharScanner('${leitorId}')">✖</button>
-        <div id="scanner-${leitorId}" style="width: 100%; height: 250px;"></div>
-      `;
-
-      if (html5QrCode) {
-        html5QrCode.stop().catch(()=>{});
-        html5QrCode.clear();
-      }
-      html5QrCode = new Html5Qrcode(`scanner-${leitorId}`);
-
-      Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length) {
-          let cameraId = cameras[0].id;
-          // Busca câmera traseira se possível
-          for (const cam of cameras) {
-            if (cam.label.toLowerCase().includes("back") || cam.label.toLowerCase().includes("traseira")) {
-              cameraId = cam.id;
-              break;
-            }
-          }
-          html5QrCode.start(
-            cameraId,
-            { fps: 10, qrbox: 250 },
-            qrCodeMessage => {
-              document.getElementById(inputId).value = qrCodeMessage;
-              fecharScanner(leitorId);
-              buscarDescricao(inputId, inputId === "codigo" ? "descricao" : "descricaoTransf");
-            },
-            errorMessage => {
-              // console.log(`Scan error: ${errorMessage}`);
-            }
-          ).catch(err => {
-            alert("Erro ao iniciar a câmera: " + err);
-            fecharScanner(leitorId);
-          });
-        }
-      }).catch(err => {
-        alert("Erro ao acessar câmeras: " + err);
-        fecharScanner(leitorId);
+    async function enviarDados(tipo, dados) {
+      const payload = {
+        tipo,
+        data: dados,
+        timestamp: new Date().toISOString()
+      };
+      const res = await fetch(URL_ENVIO_DADOS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
+      if (!res.ok) {
+        throw new Error(`Falha no envio: ${res.status} ${res.statusText}`);
+      }
+      return await res.json();
+    }
+
+    // --------- SCANNER ---------
+
+    let html5QrcodeScanner = null;
+
+    function iniciarScanner(campoCodigoId, leitorId) {
+      const leitor = document.getElementById(leitorId);
+      if (leitor.style.display === "block") {
+        fecharScanner(leitorId);
+        return;
+      }
+      leitor.style.display = "block";
+
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(() => {});
+      }
+
+      html5QrcodeScanner = new Html5Qrcode(leitorId);
+      Html5Qrcode.getCameras()
+        .then(cameras => {
+          if (cameras && cameras.length) {
+            const cameraId = cameras.find(cam => cam.label.toLowerCase().includes("back"))?.id || cameras[0].id;
+            html5QrcodeScanner.start(
+              cameraId,
+              {
+                fps: 10,
+                qrbox: 250
+              },
+              qrCodeMessage => {
+                document.getElementById(campoCodigoId).value = qrCodeMessage;
+                fecharScanner(leitorId);
+                if (campoCodigoId === "codigo") buscarDescricao("codigo", "descricao");
+                else if (campoCodigoId === "codigoTransf") buscarDescricao("codigoTransf", "descricaoTransf");
+              },
+              errorMessage => {
+                // ignorar erros pequenos
+              }
+            ).catch(err => alert("Erro ao iniciar scanner: " + err));
+          } else {
+            alert("Nenhuma câmera encontrada.");
+          }
+        })
+        .catch(err => alert("Erro ao buscar câmeras: " + err));
     }
 
     function fecharScanner(leitorId) {
       const leitor = document.getElementById(leitorId);
       leitor.style.display = "none";
-      leitor.innerHTML = "";
-      if (html5QrCode) {
-        html5QrCode.stop().catch(()=>{});
-        html5QrCode.clear();
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => html5QrcodeScanner.clear()).catch(() => {});
+        html5QrcodeScanner = null;
       }
-      cameraAtiva = null;
     }
-
-    // Inicializa carrinhos vazios no carregamento
-    renderCarrinhoUso();
-    renderCarrinhoTransf();
   </script>
 </body>
 </html>
