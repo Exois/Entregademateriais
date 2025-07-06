@@ -16,7 +16,7 @@
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      margin: 0; padding: 10px 20px;
+      margin: 0; padding: 10px;
       background: var(--cor-bg);
       color: var(--text-color);
       min-height: 100vh;
@@ -97,7 +97,6 @@
       width: 40px;
       height: 40px;
       font-size: 22px;
-      cursor: pointer;
     }
     .btn-principal {
       background: var(--cor3);
@@ -109,7 +108,6 @@
       width: 100%;
       margin-top: 12px;
       font-size: 16px;
-      cursor: pointer;
     }
     .carrinho {
       margin-top: 15px;
@@ -117,13 +115,13 @@
       padding-top: 10px;
       max-height: 250px;
       overflow-y: auto;
+      color: #fff;
     }
     .carrinho-item {
       background: rgba(255, 255, 255, 0.15);
       padding: 10px;
       border-radius: 8px;
       margin-bottom: 8px;
-      color: #fff;
       position: relative;
     }
     .acoes {
@@ -150,6 +148,19 @@
       border-radius: 8px;
       overflow: hidden;
     }
+    #leitor-camera button.fechar-camera,
+    #leitor-camera-transferencia button.fechar-camera {
+      background:#f44336;
+      color:white;
+      border:none;
+      padding:5px 10px;
+      border-radius:5px;
+      cursor:pointer;
+      margin-bottom:5px;
+      width: 100%;
+      font-weight: bold;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -163,20 +174,20 @@
   <!-- ABA USO -->
   <div id="aba-uso" class="aba active">
     <label>Transação:</label>
-    <input type="text" id="transacao" maxlength="3" autocomplete="off">
+    <input type="text" id="transacao" maxlength="3">
 
     <label>Centro de Custo:</label>
-    <input type="text" id="centro" maxlength="6" autocomplete="off">
+    <input type="text" id="centro" maxlength="6">
 
     <label>Solicitante:</label>
-    <input type="text" id="solicitante" autocomplete="off">
+    <input type="text" id="solicitante">
 
     <label>Responsável:</label>
-    <input type="text" id="responsavel" autocomplete="off">
+    <input type="text" id="responsavel">
 
     <label>Código:</label>
     <div class="linha">
-      <input type="text" id="codigo" onblur="buscarDescricao('codigo', 'descricao')" autocomplete="off">
+      <input type="text" id="codigo" onblur="buscarDescricao('codigo', 'descricao')">
       <button onclick="iniciarScanner('codigo', 'leitor-camera')">📷</button>
     </div>
     <div id="leitor-camera"></div>
@@ -191,30 +202,28 @@
       <button onclick="alterarQtd('quantidade', 1)">+</button>
     </div>
 
-    <button class="btn-principal" onclick="adicionarItemUso()">Adicionar ao Carrinho</button>
-
-    <div class="carrinho" id="carrinho-uso"></div>
-
+    <button class="btn-principal" onclick="adicionarItem()">Adicionar ao Carrinho</button>
+    <div class="carrinho" id="carrinho"></div>
     <button class="btn-principal" onclick="finalizarEntrega()">Finalizar Entrega</button>
   </div>
 
   <!-- ABA TRANSFERÊNCIA -->
   <div id="aba-transferencia" class="aba">
     <label>Armazém de Origem:</label>
-    <input type="text" id="origem" autocomplete="off">
+    <input type="text" id="origem">
 
     <label>Armazém de Destino:</label>
-    <input type="text" id="destino" autocomplete="off">
+    <input type="text" id="destino">
 
     <label>Solicitante:</label>
-    <input type="text" id="solicitanteTransf" autocomplete="off">
+    <input type="text" id="solicitanteTransf">
 
     <label>Responsável:</label>
-    <input type="text" id="responsavelTransf" autocomplete="off">
+    <input type="text" id="responsavelTransf">
 
     <label>Código:</label>
     <div class="linha">
-      <input type="text" id="codigoTransf" onblur="buscarDescricao('codigoTransf', 'descricaoTransf')" autocomplete="off">
+      <input type="text" id="codigoTransf" onblur="buscarDescricao('codigoTransf', 'descricaoTransf')">
       <button onclick="iniciarScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
     </div>
     <div id="leitor-camera-transferencia"></div>
@@ -230,16 +239,13 @@
     </div>
 
     <button class="btn-principal" onclick="adicionarItemTransf()">Adicionar ao Carrinho</button>
-
-    <div class="carrinho" id="carrinho-transf"></div>
-
+    <div class="carrinho" id="carrinhoTransf"></div>
     <button class="btn-principal" onclick="finalizarTransferencia()">Finalizar Transferência</button>
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbzrUd51_l3if4GdFaVHYtxvYfznpHH5TN16GgB9yFZHQwNYOE30QKJTuawEtQa914hm/exec";
-
-    let carrinhoUso = [];
+    const API = "https://script.google.com/macros/s/AKfycbxjcuB07wsFhazObPzzR0K1HPxi4SYfaJOlAQoJGHR2ttUSKgtOQRNkgv5XimajRVpEyQ/exec";
+    let carrinho = [];
     let carrinhoTransf = [];
 
     function mostrarAba(aba) {
@@ -267,12 +273,7 @@
       }
     }
 
-    function getVal(id) {
-      return document.getElementById(id)?.value?.trim();
-    }
-
-    // Uso Consumo - carrinho e funções
-    function adicionarItemUso() {
+    function adicionarItem() {
       const item = {
         codigo: getVal("codigo"),
         descricao: getVal("descricao"),
@@ -283,50 +284,46 @@
         responsavel: getVal("responsavel")
       };
 
-      if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
-        alert("Preencha todos os campos corretamente no Uso Consumo.");
+      if (Object.values(item).some(v => !v || v === "Não encontrado")) {
+        alert("Preencha todos os campos corretamente.");
         return;
       }
 
-      carrinhoUso.push(item);
-      renderCarrinhoUso();
-      // limpa só os campos de item (não limpa transação, centro, solicitante, responsável)
-      document.getElementById("codigo").value = "";
-      document.getElementById("descricao").value = "";
-      document.getElementById("quantidade").value = 1;
+      carrinho.push(item);
+      renderCarrinho();
+      ["codigo", "descricao", "quantidade"].forEach(id => document.getElementById(id).value = id === "quantidade" ? 1 : "");
     }
 
-    function renderCarrinhoUso() {
-      const div = document.getElementById("carrinho-uso");
+    function renderCarrinho() {
+      const div = document.getElementById("carrinho");
       div.innerHTML = "<h3>Itens:</h3>";
-      carrinhoUso.forEach((item, i) => {
+      carrinho.forEach((item, i) => {
         div.innerHTML += `
           <div class="carrinho-item">
             <div><b>${item.codigo}</b> - ${item.descricao} (${item.quantidade})</div>
             <small>${item.transacao} | ${item.centro} | ${item.solicitante} | ${item.responsavel}</small>
             <div class="acoes">
-              <button onclick="editarItemUso(${i})">Editar</button>
-              <button class="excluir" onclick="excluirItemUso(${i})">Excluir</button>
+              <button onclick="editarItem(${i})">Editar</button>
+              <button class="excluir" onclick="excluirItem(${i})">Excluir</button>
             </div>
           </div>`;
       });
     }
 
-    function editarItemUso(i) {
-      const item = carrinhoUso[i];
+    function editarItem(i) {
+      const item = carrinho[i];
       Object.keys(item).forEach(id => {
         if (document.getElementById(id)) document.getElementById(id).value = item[id];
       });
-      carrinhoUso.splice(i, 1);
-      renderCarrinhoUso();
+      carrinho.splice(i, 1);
+      renderCarrinho();
     }
 
-    function excluirItemUso(i) {
-      carrinhoUso.splice(i, 1);
-      renderCarrinhoUso();
+    function excluirItem(i) {
+      carrinho.splice(i, 1);
+      renderCarrinho();
     }
 
-    // Transferência - carrinho e funções
     function adicionarItemTransf() {
       const item = {
         codigo: getVal("codigoTransf"),
@@ -338,21 +335,18 @@
         responsavel: getVal("responsavelTransf")
       };
 
-      if (Object.values(item).some(v => !v || v === "Não encontrado" || v === "Erro")) {
-        alert("Preencha todos os campos corretamente na Transferência.");
+      if (Object.values(item).some(v => !v || v === "Não encontrado")) {
+        alert("Preencha todos os campos corretamente.");
         return;
       }
 
       carrinhoTransf.push(item);
       renderCarrinhoTransf();
-      // limpa só os campos de item (não limpa origem, destino, solicitante, responsável)
-      document.getElementById("codigoTransf").value = "";
-      document.getElementById("descricaoTransf").value = "";
-      document.getElementById("quantidadeTransf").value = 1;
+      ["codigoTransf", "descricaoTransf", "quantidadeTransf"].forEach(id => document.getElementById(id).value = id === "quantidadeTransf" ? 1 : "");
     }
 
     function renderCarrinhoTransf() {
-      const div = document.getElementById("carrinho-transf");
+      const div = document.getElementById("carrinhoTransf");
       div.innerHTML = "<h3>Itens:</h3>";
       carrinhoTransf.forEach((item, i) => {
         div.innerHTML += `
@@ -381,31 +375,64 @@
       renderCarrinhoTransf();
     }
 
-    function finalizarEntrega() {
-      if(carrinhoUso.length === 0) {
-        alert("Adicione ao menos um item no carrinho Uso Consumo antes de finalizar.");
+    async function finalizarEntrega() {
+      if (carrinho.length === 0) {
+        alert("Adicione ao menos um item.");
         return;
       }
+      // Para testes, só alerta:
       alert("Entrega finalizada com sucesso!");
-      // para enviar para planilha, implementar aqui depois
-      carrinhoUso = [];
-      renderCarrinhoUso();
+      // Se quiser enviar ao Google Sheets, aqui vai a fetch (comentei pois estava dando erro):
+      /*
+      try {
+        await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tipo: "uso", itens: carrinho })
+        });
+        alert("Entrega enviada!");
+        carrinho = [];
+        renderCarrinho();
+      } catch {
+        alert("Erro ao enviar.");
+      }
+      */
     }
 
-    function finalizarTransferencia() {
-      if(carrinhoTransf.length === 0) {
-        alert("Adicione ao menos um item no carrinho Transferência antes de finalizar.");
+    async function finalizarTransferencia() {
+      if (carrinhoTransf.length === 0) {
+        alert("Adicione ao menos um item.");
         return;
       }
       alert("Transferência finalizada com sucesso!");
-      // para enviar para planilha, implementar aqui depois
-      carrinhoTransf = [];
-      renderCarrinhoTransf();
+      // fetch para envio se desejar:
+      /*
+      try {
+        await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tipo: "transferencia", itens: carrinhoTransf })
+        });
+        alert("Transferência enviada!");
+        carrinhoTransf = [];
+        renderCarrinhoTransf();
+      } catch {
+        alert("Erro ao enviar.");
+      }
+      */
+    }
+
+    function getVal(id) {
+      return document.getElementById(id)?.value?.trim();
     }
 
     function iniciarScanner(inputId, divId) {
       const div = document.getElementById(divId);
       div.style.display = "block";
+      div.innerHTML = `
+        <button class="fechar-camera" onclick="fecharScanner('${divId}')">Fechar câmera</button>
+      `;
+
       const scanner = new Html5Qrcode(divId);
 
       Html5Qrcode.getCameras().then(cameras => {
@@ -418,13 +445,37 @@
             document.getElementById(inputId).value = codigo;
             if(inputId === "codigo") buscarDescricao(inputId, "descricao");
             else buscarDescricao(inputId, "descricaoTransf");
-            scanner.stop().then(() => {
-              div.innerHTML = "";
-              div.style.display = "none";
-            });
+            fecharScanner(divId);
           }
-        );
+        ).catch(err => {
+          alert("Erro ao iniciar câmera: " + err);
+          fecharScanner(divId);
+        });
+
+        // Guarda scanner na div para controlar depois
+        div._scanner = scanner;
+      }).catch(err => {
+        alert("Nenhuma câmera encontrada: " + err);
+        fecharScanner(divId);
       });
+    }
+
+    function fecharScanner(divId) {
+      const div = document.getElementById(divId);
+      if (div._scanner) {
+        div._scanner.stop().then(() => {
+          div.innerHTML = "";
+          div.style.display = "none";
+          div._scanner = null;
+        }).catch(() => {
+          div.innerHTML = "";
+          div.style.display = "none";
+          div._scanner = null;
+        });
+      } else {
+        div.innerHTML = "";
+        div.style.display = "none";
+      }
     }
   </script>
 </body>
