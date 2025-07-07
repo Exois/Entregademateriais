@@ -27,7 +27,7 @@
       font-size: 48px;
       font-weight: bold;
       text-align: center;
-      color: white;
+      color: #28e0d7;
       font-family: 'Pacifico', cursive;
       margin-bottom: 0;
     }
@@ -193,16 +193,16 @@ input[type="number"] {
   <div id="aba-uso" class="aba active">
     <div class="formulario">
       <label>Transação:</label>
-      <input type="text" id="transacao">
+      <input type="text" id="transacao" maxlength="3">
       <label>Centro de Custo:</label>
-      <input type="text" id="centro">
+      <input type="text" id="centro" maxlength="6">
       <label>Solicitante:</label>
-      <input type="text" id="solicitante">
+      <input type="text" id="solicitante" maxlength="6">
       <label>Responsável pelo Atendimento:</label>
-      <input type="text" id="responsavel">
+      <input type="text" id="responsavel" maxlength="6">
       <label>Código do Material:</label>
       <div class="linha">
-        <input type="text" id="codigo">
+        <input type="text" id="codigo" maxlength="11">
         <button onclick="toggleScanner('codigo', 'leitor-camera')">📷</button>
       </div>
       <div id="leitor-camera"></div>
