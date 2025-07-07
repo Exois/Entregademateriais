@@ -2,89 +2,94 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Entrega de Materiais</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --cor1: #25d3b9;
-      --cor2: #0632a0;
-      --cor-fundo: linear-gradient(135deg, var(--cor1), var(--cor2));
-      --cor-campo: #f5deb3;
-      --cor-botao: linear-gradient(to bottom, #f5e6ca, #fff6e0);
-    }
-
-    * {
-      box-sizing: border-box;
+      --cor-degrade: linear-gradient(135deg, #2CD3A4, #00298C);
+      --cor-bege-degrade: linear-gradient(135deg, #f3e9d2, #fff9e5);
+      --cor-borda: rgba(0, 0, 0, 0.1);
+      --fonte-principal: Arial, sans-serif;
     }
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--cor-fundo);
-      color: #2e2a70;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      font-family: var(--fonte-principal);
+      background: var(--cor-degrade);
+      color: #333;
       padding: 20px;
     }
 
     .logo-text {
-      font-size: 52px;
-      font-weight: 900;
-      font-family: 'Arial Black', sans-serif;
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
       color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      margin-bottom: 10px;
+      font-family: 'Arial Black', sans-serif;
+      margin-bottom: 0;
     }
 
     h1 {
+      text-align: center;
+      color: #fff8dc;
       font-size: 22px;
-      margin-bottom: 20px;
-      color: white;
-    }
-
-    .container {
-      background: rgba(255,255,255,0.3);
-      border-radius: 12px;
-      padding: 20px;
-      width: 100%;
-      max-width: 400px;
+      margin: 4px 0 20px;
     }
 
     .tabs {
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
     .tabs button {
-      flex: 1;
-      margin: 0 5px;
-      padding: 12px;
+      background: var(--cor-bege-degrade);
       font-weight: bold;
       border: none;
-      border-radius: 8px;
-      background: var(--cor-botao);
+      padding: 10px 20px;
+      border-radius: 10px;
       cursor: pointer;
+    }
+
+    .tabs button.active {
+      outline: 2px solid #888;
+    }
+
+    .aba {
+      display: none;
+    }
+
+    .aba.active {
+      display: block;
+    }
+
+    .formulario {
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     label {
       display: block;
-      margin-top: 10px;
       font-weight: bold;
+      margin-top: 12px;
     }
 
-    input[type="text"], input[type="number"] {
+    input[type="text"],
+    input[type="number"] {
       width: 100%;
-      padding: 10px 14px;
-      margin-top: 4px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.2);
-      background: var(--cor-campo);
-      font-size: 15px;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--cor-borda);
+      background: rgba(255,255,255,0.9);
+      margin-top: 5px;
     }
 
     .linha {
@@ -93,118 +98,270 @@
       align-items: center;
     }
 
-    .linha input[type="text"] {
-      flex: 1;
-    }
-
     .linha button {
-      padding: 10px;
-      font-size: 22px;
+      width: 48px;
+      height: 48px;
+      font-size: 24px;
+      background: var(--cor-bege-degrade);
+      border-radius: 10px;
       border: none;
-      border-radius: 8px;
-      background: var(--cor-botao);
       cursor: pointer;
     }
 
     .quantidade-control {
       display: flex;
+      gap: 5px;
+      margin-top: 5px;
       align-items: center;
-      justify-content: space-between;
     }
 
     .quantidade-control button {
-      width: 40px;
+      width: 50px;
+      font-size: 24px;
       height: 40px;
-      font-size: 22px;
+      border-radius: 10px;
       border: none;
-      background: var(--cor-botao);
-      border-radius: 8px;
+      background: var(--cor-bege-degrade);
       cursor: pointer;
     }
 
     .btn-principal {
       width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: bold;
+      padding: 12px;
       margin-top: 10px;
+      font-size: 16px;
+      background: var(--cor-bege-degrade);
       border: none;
-      border-radius: 8px;
-      background: var(--cor-botao);
+      border-radius: 10px;
+      font-weight: bold;
       cursor: pointer;
     }
 
     .carrinho {
-      background: var(--cor-campo);
+      background: rgba(255,255,255,0.8);
+      margin-top: 20px;
       padding: 10px;
-      border-radius: 8px;
-      margin-top: 10px;
+      border-radius: 10px;
     }
 
-    .acoes {
+    .carrinho-item {
+      background: #fdf6e3;
+      padding: 8px;
+      border-radius: 10px;
+      margin-bottom: 8px;
       display: flex;
-      gap: 10px;
-      margin-top: 5px;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .acoes button {
-      flex: 1;
-      padding: 6px 10px;
-      font-size: 14px;
+      margin-left: 5px;
+      padding: 4px 8px;
       border: none;
       border-radius: 6px;
-      background: var(--cor-botao);
       cursor: pointer;
+    }
+
+    .acoes .editar {
+      background: #f0c674;
+    }
+
+    .acoes .excluir {
+      background: #f47c7c;
+    }
+
+    #leitor-camera, #leitor-camera-transferencia {
+      display: none;
+      margin-top: 10px;
+      border-radius: 8px;
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
+
   <div class="logo-text">Cremer</div>
   <h1>ENTREGA DE MATERIAIS</h1>
-  <div class="container">
-    <div class="tabs">
-      <button>Uso Consumo</button>
-      <button>Transferência</button>
-    </div>
 
-    <label>Transação:</label>
-    <input type="text" />
+  <div class="tabs">
+    <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
+    <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
+  </div>
 
-    <label>Centro de Custo:</label>
-    <input type="text" />
-
-    <label>Solicitante:</label>
-    <input type="text" />
-
-    <label>Responsável pelo Atendimento:</label>
-    <input type="text" />
-
-    <label>Código do Material:</label>
-    <div class="linha">
-      <input type="text" />
-      <button>📷</button>
-    </div>
-
-    <label>Quantidade:</label>
-    <div class="quantidade-control">
-      <button>−</button>
-      <input type="number" value="1" min="1" />
-      <button>+</button>
-    </div>
-
-    <button class="btn-principal">Adicionar ao Carrinho</button>
-    <button class="btn-principal">Finalizar Entrega</button>
-
-    <div class="carrinho">
-      <strong>Itens:</strong>
-      <div>
-        123456 – Produto A
-        <div class="acoes">
-          <button>Editar</button>
-          <button>Excluir</button>
-        </div>
+  <!-- ABA USO -->
+  <div id="aba-uso" class="aba active">
+    <div class="formulario">
+      <label>Transação:</label>
+      <input type="text" id="transacao">
+      <label>Centro de Custo:</label>
+      <input type="text" id="centro">
+      <label>Solicitante:</label>
+      <input type="text" id="solicitante">
+      <label>Responsável pelo Atendimento:</label>
+      <input type="text" id="responsavel">
+      <label>Código do Material:</label>
+      <div class="linha">
+        <input type="text" id="codigo">
+        <button onclick="toggleScanner('codigo', 'leitor-camera')">📷</button>
       </div>
+      <div id="leitor-camera"></div>
+      <label>Quantidade:</label>
+      <div class="quantidade-control">
+        <button onclick="alterarQtd('quantidade', -1)">−</button>
+        <input type="number" id="quantidade" value="1" min="1">
+        <button onclick="alterarQtd('quantidade', 1)">+</button>
+      </div>
+      <button class="btn-principal" onclick="adicionarItem('uso')">Adicionar ao Carrinho</button>
+      <button class="btn-principal" onclick="finalizarEntrega('uso')">Finalizar Entrega</button>
+      <div class="carrinho" id="carrinhoUso"></div>
     </div>
   </div>
+
+  <!-- ABA TRANSFERENCIA -->
+  <div id="aba-transferencia" class="aba">
+    <div class="formulario">
+      <label>Armazém de Origem:</label>
+      <input type="text" id="origem">
+      <label>Armazém de Destino:</label>
+      <input type="text" id="destino">
+      <label>Solicitante:</label>
+      <input type="text" id="solicitanteTransf">
+      <label>Responsável pelo Atendimento:</label>
+      <input type="text" id="responsavelTransf">
+      <label>Código do Material:</label>
+      <div class="linha">
+        <input type="text" id="codigoTransf">
+        <button onclick="toggleScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
+      </div>
+      <div id="leitor-camera-transferencia"></div>
+      <label>Quantidade:</label>
+      <div class="quantidade-control">
+        <button onclick="alterarQtd('quantidadeTransf', -1)">−</button>
+        <input type="number" id="quantidadeTransf" value="1" min="1">
+        <button onclick="alterarQtd('quantidadeTransf', 1)">+</button>
+      </div>
+      <button class="btn-principal" onclick="adicionarItem('transf')">Adicionar ao Carrinho</button>
+      <button class="btn-principal" onclick="finalizarEntrega('transf')">Finalizar Transferência</button>
+      <div class="carrinho" id="carrinhoTransf"></div>
+    </div>
+  </div>
+
+<script>
+  let carrinhoUso = [];
+  let carrinhoTransf = [];
+  let scanner = null;
+
+  function mostrarAba(aba) {
+    document.querySelectorAll(".aba").forEach(e => e.classList.remove("active"));
+    document.querySelectorAll(".tabs button").forEach(e => e.classList.remove("active"));
+    document.getElementById("aba-" + aba).classList.add("active");
+    document.getElementById("btn-" + aba).classList.add("active");
+    fecharScanner();
+  }
+
+  function alterarQtd(id, val) {
+    const input = document.getElementById(id);
+    let v = parseInt(input.value) || 1;
+    v = Math.max(1, v + val);
+    input.value = v;
+  }
+
+  function adicionarItem(tipo) {
+    const item = tipo === "uso" ? {
+      transacao: getVal("transacao"),
+      centro: getVal("centro"),
+      solicitante: getVal("solicitante"),
+      responsavel: getVal("responsavel"),
+      codigo: getVal("codigo"),
+      quantidade: getVal("quantidade")
+    } : {
+      origem: getVal("origem"),
+      destino: getVal("destino"),
+      solicitante: getVal("solicitanteTransf"),
+      responsavel: getVal("responsavelTransf"),
+      codigo: getVal("codigoTransf"),
+      quantidade: getVal("quantidadeTransf")
+    };
+
+    const campos = Object.values(item);
+    if (campos.some(v => !v)) return alert("Preencha todos os campos.");
+
+    (tipo === "uso" ? carrinhoUso : carrinhoTransf).push(item);
+    renderCarrinho(tipo);
+    limparCampos(tipo);
+  }
+
+  function renderCarrinho(tipo) {
+    const div = document.getElementById(tipo === "uso" ? "carrinhoUso" : "carrinhoTransf");
+    const carrinho = tipo === "uso" ? carrinhoUso : carrinhoTransf;
+    div.innerHTML = "<strong>Itens:</strong>" + carrinho.map((item, i) =>
+      `<div class="carrinho-item">
+        <span>${item.codigo} – ${item.quantidade}</span>
+        <div class="acoes">
+          <button class="editar" onclick="editarItem('${tipo}', ${i})">Editar</button>
+          <button class="excluir" onclick="excluirItem('${tipo}', ${i})">Excluir</button>
+        </div>
+      </div>`).join("");
+  }
+
+  function editarItem(tipo, i) {
+    const item = (tipo === "uso" ? carrinhoUso : carrinhoTransf)[i];
+    Object.entries(item).forEach(([k, v]) => {
+      const campo = document.getElementById(k + (tipo === "transf" && k !== "codigo" ? "Transf" : ""));
+      if (campo) campo.value = v;
+    });
+    (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
+    renderCarrinho(tipo);
+  }
+
+  function excluirItem(tipo, i) {
+    (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
+    renderCarrinho(tipo);
+  }
+
+  function finalizarEntrega(tipo) {
+    const dados = tipo === "uso" ? carrinhoUso : carrinhoTransf;
+    if (dados.length === 0) return alert("Carrinho vazio.");
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(dados);
+    XLSX.utils.book_append_sheet(wb, ws, tipo);
+    XLSX.writeFile(wb, tipo === "uso" ? "UsoConsumo.xlsx" : "Transferencia.xlsx");
+    if (tipo === "uso") carrinhoUso = []; else carrinhoTransf = [];
+    renderCarrinho(tipo);
+  }
+
+  function limparCampos(tipo) {
+    const campos = tipo === "uso" ?
+      ["codigo", "quantidade"] :
+      ["codigoTransf", "quantidadeTransf"];
+    campos.forEach(id => document.getElementById(id).value = id.includes("quantidade") ? 1 : "");
+  }
+
+  function getVal(id) {
+    return document.getElementById(id)?.value.trim();
+  }
+
+  function toggleScanner(campo, divId) {
+    const div = document.getElementById(divId);
+    if (div.style.display === "block") return fecharScanner();
+
+    fecharScanner();
+    div.style.display = "block";
+    scanner = new Html5Qrcode(divId);
+    Html5Qrcode.getCameras().then(cameras => {
+      const camId = cameras.find(c => c.label.toLowerCase().includes("back"))?.id || cameras[0].id;
+      scanner.start(camId, { fps: 10, qrbox: 250 }, msg => {
+        document.getElementById(campo).value = msg;
+        fecharScanner();
+      });
+    });
+  }
+
+  function fecharScanner() {
+    document.querySelectorAll("#leitor-camera, #leitor-camera-transferencia").forEach(e => e.style.display = "none");
+    if (scanner) scanner.stop().then(() => scanner.clear());
+    scanner = null;
+  }
+</script>
 </body>
 </html>
