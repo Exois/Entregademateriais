@@ -8,224 +8,342 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --cor1: #2e8b57;
-      --cor2: #4682b4;
-      --cor-bg: linear-gradient(135deg, #2e8b57, #4682b4);
+      --cor-bg: linear-gradient(135deg, #20dbc3, #001c97);
+      --btn-bg: linear-gradient(135deg, #c0a677, #f7f3e6);
       --text-color: white;
     }
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      margin: 0; padding: 10px;
+      margin: 0;
       background: var(--cor-bg);
       color: var(--text-color);
       min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
       text-align: center;
-      margin: 10px 0;
-    }
-    .logo-text {
-      font-size: 36px;
-      font-weight: 900;
-      color: white;
-      text-align: center;
       margin-bottom: 10px;
-      letter-spacing: 4px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
-      user-select: none;
     }
     .tabs {
       display: flex;
-      justify-content: center;
       gap: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     .tabs button {
-      background: var(--cor2);
-      color: var(--text-color);
-      font-weight: bold;
-      padding: 10px 20px;
+      background: var(--btn-bg);
       border: none;
+      padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
-    }
-    .tabs button.active {
-      background: #b0c4de;
-      color: #003366;
-    }
-    .aba { display: none; }
-    .aba.active { display: block; }
-    label {
-      display: block;
-      margin: 8px 0 4px;
       font-weight: bold;
       color: black;
     }
-    input[type="text"], input[type="number"] {
-      width: 100%; padding: 10px;
-      border-radius: 8px;
+    .tabs button.active {
       background: white;
-      color: black;
-      border: 1px solid #ccc;
+      color: #001c97;
+    }
+    .aba {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+    }
+    .aba.active {
+      display: block;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      margin-bottom: 10px;
     }
     .linha {
       display: flex;
-      gap: 5px;
+      gap: 10px;
       align-items: center;
     }
     .linha button {
-      font-size: 26px;
-      width: 48px;
-      height: 48px;
-      background: var(--cor2);
-      color: white;
+      font-size: 24px;
+      padding: 10px;
       border: none;
       border-radius: 8px;
+      background: var(--btn-bg);
       cursor: pointer;
+      color: black;
     }
     .quantidade-control {
       display: flex;
+      gap: 10px;
       align-items: center;
-      gap: 5px;
     }
     .quantidade-control button {
-      width: 40px; height: 40px;
-      font-size: 22px;
-      background: var(--cor2);
-      color: white;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      background: var(--btn-bg);
       border: none;
       border-radius: 8px;
+      cursor: pointer;
+      color: black;
     }
     .btn-principal {
-      padding: 14px; font-weight: bold;
-      width: 100%; font-size: 16px;
-      margin-top: 12px;
-      background: var(--cor2);
-      color: white;
+      margin-top: 10px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      background: var(--btn-bg);
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
+      color: black;
+      cursor: pointer;
     }
     .carrinho {
-      margin-top: 10px;
-      background: #fff;
+      background: white;
       color: black;
-      border-radius: 10px;
       padding: 10px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+    .item {
+      background: #eee;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      position: relative;
     }
     .acoes {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       display: flex;
       gap: 5px;
+    }
+    .acoes button {
+      padding: 5px 8px;
+      font-size: 12px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+    }
+    .acoes .editar { background-color: #007bff; }
+    .acoes .excluir { background-color: #dc3545; }
+    #leitor-camera, #leitor-camera-transferencia {
+      display: none;
+      margin-top: 10px;
+      position: relative;
+    }
+    .fechar-camera-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(255, 0, 0, 0.8);
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
-<div class="logo-text">Cremer</div>
-<h1>Entrega de Materiais</h1>
-<div class="tabs">
-  <button onclick="mostrarAba('uso')" class="active">Uso Consumo</button>
-  <button onclick="mostrarAba('transf')">Transferência</button>
-</div>
-<div id="uso" class="aba active">
-  <label>Transação:</label><input type="text" id="transacao">
-  <label>Centro de Custo:</label><input type="text" id="centro">
-  <label>Solicitante:</label><input type="text" id="solicitante">
-  <label>Responsável:</label><input type="text" id="responsavel">
-  <label>Código:</label>
-  <div class="linha">
-    <input type="text" id="codigoUso">
-    <button onclick="iniciarScanner('codigoUso', 'leitorUso')">📷</button>
+
+  <h1>Entrega de Materiais</h1>
+  <div class="tabs">
+    <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
+    <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
   </div>
-  <div id="leitorUso"></div>
-  <label>Quantidade:</label>
-  <div class="quantidade-control">
-    <button onclick="alterarQtd('qtdUso', -1)">−</button>
-    <input type="number" id="qtdUso" value="1" min="1">
-    <button onclick="alterarQtd('qtdUso', 1)">+</button>
+
+  <div id="aba-uso" class="aba active">
+    <label>Transação</label><input id="transacao" />
+    <label>Centro de Custo</label><input id="centro" />
+    <label>Solicitante</label><input id="solicitante" />
+    <label>Responsável</label><input id="responsavel" />
+    <label>Código</label>
+    <div class="linha">
+      <input id="codigo" />
+      <button onclick="iniciarScanner('codigo', 'leitor-camera')">📷</button>
+    </div>
+    <div id="leitor-camera"><button class="fechar-camera-btn" onclick="fecharScanner('leitor-camera')">X</button></div>
+    <label>Quantidade</label>
+    <div class="quantidade-control">
+      <button onclick="alterarQtd('quantidade', -1)">-</button>
+      <input type="number" id="quantidade" value="1" />
+      <button onclick="alterarQtd('quantidade', 1)">+</button>
+    </div>
+    <button class="btn-principal" onclick="adicionarItemUso()">Adicionar</button>
+    <div class="carrinho" id="carrinhoUso"></div>
+    <button class="btn-principal" onclick="exportarUso()">Finalizar Entrega</button>
   </div>
-  <button class="btn-principal" onclick="adicionarItem('uso')">Adicionar</button>
-  <div id="carrinhoUso" class="carrinho"></div>
-  <button class="btn-principal" onclick="baixarExcel('uso')">Finalizar e Baixar Excel</button>
-</div>
-<div id="transf" class="aba">
-  <label>Origem:</label><input type="text" id="origem">
-  <label>Destino:</label><input type="text" id="destino">
-  <label>Solicitante:</label><input type="text" id="solicitanteTransf">
-  <label>Responsável:</label><input type="text" id="responsavelTransf">
-  <label>Código:</label>
-  <div class="linha">
-    <input type="text" id="codigoTransf">
-    <button onclick="iniciarScanner('codigoTransf', 'leitorTransf')">📷</button>
+
+  <div id="aba-transferencia" class="aba">
+    <label>Origem</label><input id="origem" />
+    <label>Destino</label><input id="destino" />
+    <label>Solicitante</label><input id="solicitanteT" />
+    <label>Responsável</label><input id="responsavelT" />
+    <label>Código</label>
+    <div class="linha">
+      <input id="codigoT" />
+      <button onclick="iniciarScanner('codigoT', 'leitor-camera-transferencia')">📷</button>
+    </div>
+    <div id="leitor-camera-transferencia"><button class="fechar-camera-btn" onclick="fecharScanner('leitor-camera-transferencia')">X</button></div>
+    <label>Quantidade</label>
+    <div class="quantidade-control">
+      <button onclick="alterarQtd('quantidadeT', -1)">-</button>
+      <input type="number" id="quantidadeT" value="1" />
+      <button onclick="alterarQtd('quantidadeT', 1)">+</button>
+    </div>
+    <button class="btn-principal" onclick="adicionarItemTransf()">Adicionar</button>
+    <div class="carrinho" id="carrinhoTransf"></div>
+    <button class="btn-principal" onclick="exportarTransf()">Finalizar Transferência</button>
   </div>
-  <div id="leitorTransf"></div>
-  <label>Quantidade:</label>
-  <div class="quantidade-control">
-    <button onclick="alterarQtd('qtdTransf', -1)">−</button>
-    <input type="number" id="qtdTransf" value="1" min="1">
-    <button onclick="alterarQtd('qtdTransf', 1)">+</button>
-  </div>
-  <button class="btn-principal" onclick="adicionarItem('transf')">Adicionar</button>
-  <div id="carrinhoTransf" class="carrinho"></div>
-  <button class="btn-principal" onclick="baixarExcel('transf')">Finalizar e Baixar Excel</button>
-</div>
+
 <script>
-let carrinhos = { uso: [], transf: [] };
+let carrinhoUso = [], carrinhoTransf = [], scanner;
+
 function mostrarAba(aba) {
-  document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-  document.getElementById(aba).classList.add('active');
-  event.target.classList.add('active');
+  document.querySelectorAll(".aba").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".tabs button").forEach(el => el.classList.remove("active"));
+  document.getElementById("aba-" + aba).classList.add("active");
+  document.getElementById("btn-" + aba).classList.add("active");
 }
-function alterarQtd(id, val) {
+
+function alterarQtd(id, delta) {
   const el = document.getElementById(id);
-  let v = parseInt(el.value) + val;
-  if (v < 1) v = 1;
-  el.value = v;
+  el.value = Math.max(1, parseInt(el.value || 1) + delta);
 }
-function adicionarItem(tipo) {
-  const item = tipo === 'uso' ? {
-    codigo: document.getElementById('codigoUso').value.trim(),
-    quantidade: document.getElementById('qtdUso').value,
-    transacao: document.getElementById('transacao').value.trim(),
-    centro: document.getElementById('centro').value.trim(),
-    solicitante: document.getElementById('solicitante').value.trim(),
-    responsavel: document.getElementById('responsavel').value.trim()
-  } : {
-    codigo: document.getElementById('codigoTransf').value.trim(),
-    quantidade: document.getElementById('qtdTransf').value,
-    origem: document.getElementById('origem').value.trim(),
-    destino: document.getElementById('destino').value.trim(),
-    solicitante: document.getElementById('solicitanteTransf').value.trim(),
-    responsavel: document.getElementById('responsavelTransf').value.trim()
+
+function adicionarItemUso() {
+  const item = {
+    transacao: transacao.value,
+    centro: centro.value,
+    solicitante: solicitante.value,
+    responsavel: responsavel.value,
+    codigo: codigo.value,
+    quantidade: quantidade.value
   };
-  carrinhos[tipo].push(item);
-  renderCarrinho(tipo);
+  if (Object.values(item).some(v => !v)) return alert("Preencha todos os campos.");
+  carrinhoUso.push(item);
+  renderCarrinho(carrinhoUso, "carrinhoUso", "uso");
+  codigo.value = ""; quantidade.value = 1;
 }
-function renderCarrinho(tipo) {
-  const div = document.getElementById('carrinho' + (tipo === 'uso' ? 'Uso' : 'Transf'));
-  div.innerHTML = carrinhos[tipo].map(item => '<div><b>' + item.codigo + '</b> - Qtd: ' + item.quantidade + '</div>').join('');
+
+function adicionarItemTransf() {
+  const item = {
+    origem: origem.value,
+    destino: destino.value,
+    solicitante: solicitanteT.value,
+    responsavel: responsavelT.value,
+    codigo: codigoT.value,
+    quantidade: quantidadeT.value
+  };
+  if (Object.values(item).some(v => !v)) return alert("Preencha todos os campos.");
+  carrinhoTransf.push(item);
+  renderCarrinho(carrinhoTransf, "carrinhoTransf", "transf");
+  codigoT.value = ""; quantidadeT.value = 1;
 }
-function baixarExcel(tipo) {
-  if (carrinhos[tipo].length === 0) return alert('Carrinho vazio.');
-  const ws = XLSX.utils.json_to_sheet(carrinhos[tipo]);
+
+function renderCarrinho(carrinho, id, tipo) {
+  const div = document.getElementById(id);
+  div.innerHTML = "";
+  carrinho.forEach((item, i) => {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML = `
+      <div><b>${item.codigo}</b> (${item.quantidade})</div>
+      <div class="acoes">
+        <button class="editar" onclick="editarItem('${tipo}', ${i})">Editar</button>
+        <button class="excluir" onclick="excluirItem('${tipo}', ${i})">Excluir</button>
+      </div>`;
+    div.appendChild(el);
+  });
+}
+
+function editarItem(tipo, i) {
+  const item = tipo === "uso" ? carrinhoUso[i] : carrinhoTransf[i];
+  if (tipo === "uso") {
+    transacao.value = item.transacao;
+    centro.value = item.centro;
+    solicitante.value = item.solicitante;
+    responsavel.value = item.responsavel;
+    codigo.value = item.codigo;
+    quantidade.value = item.quantidade;
+    carrinhoUso.splice(i, 1);
+    renderCarrinho(carrinhoUso, "carrinhoUso", "uso");
+  } else {
+    origem.value = item.origem;
+    destino.value = item.destino;
+    solicitanteT.value = item.solicitante;
+    responsavelT.value = item.responsavel;
+    codigoT.value = item.codigo;
+    quantidadeT.value = item.quantidade;
+    carrinhoTransf.splice(i, 1);
+    renderCarrinho(carrinhoTransf, "carrinhoTransf", "transf");
+  }
+}
+
+function excluirItem(tipo, i) {
+  if (tipo === "uso") {
+    carrinhoUso.splice(i, 1);
+    renderCarrinho(carrinhoUso, "carrinhoUso", "uso");
+  } else {
+    carrinhoTransf.splice(i, 1);
+    renderCarrinho(carrinhoTransf, "carrinhoTransf", "transf");
+  }
+}
+
+function exportarUso() {
+  if (carrinhoUso.length === 0) return alert("Adicione itens primeiro.");
+  const ws = XLSX.utils.json_to_sheet(carrinhoUso);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, tipo);
-  XLSX.writeFile(wb, `${tipo === 'uso' ? 'UsoConsumo' : 'Transferencia'}.xlsx`);
-  carrinhos[tipo] = [];
-  renderCarrinho(tipo);
+  XLSX.utils.book_append_sheet(wb, ws, "UsoConsumo");
+  XLSX.writeFile(wb, "UsoConsumo.xlsx");
+  carrinhoUso = [];
+  renderCarrinho(carrinhoUso, "carrinhoUso", "uso");
 }
-function iniciarScanner(inputId, containerId) {
-  const container = document.getElementById(containerId);
-  if (container.innerHTML !== '') return;
-  const scanner = new Html5Qrcode(containerId);
+
+function exportarTransf() {
+  if (carrinhoTransf.length === 0) return alert("Adicione itens primeiro.");
+  const ws = XLSX.utils.json_to_sheet(carrinhoTransf);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Transferencia");
+  XLSX.writeFile(wb, "Transferencia.xlsx");
+  carrinhoTransf = [];
+  renderCarrinho(carrinhoTransf, "carrinhoTransf", "transf");
+}
+
+function iniciarScanner(campoId, leitorId) {
+  const leitor = document.getElementById(leitorId);
+  leitor.style.display = "block";
+  if (scanner) scanner.clear().catch(() => {});
+  scanner = new Html5Qrcode(leitorId);
   Html5Qrcode.getCameras().then(cameras => {
-    const cam = cameras.find(c => c.label.toLowerCase().includes('back')) || cameras[0];
+    const cam = cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
     scanner.start(cam.id, { fps: 10, qrbox: 250 }, txt => {
-      document.getElementById(inputId).value = txt;
-      scanner.stop();
-      container.innerHTML = '';
+      document.getElementById(campoId).value = txt;
+      fecharScanner(leitorId);
     });
   });
+}
+
+function fecharScanner(leitorId) {
+  const leitor = document.getElementById(leitorId);
+  leitor.style.display = "none";
+  if (scanner) {
+    scanner.stop().then(() => scanner.clear()).catch(() => {});
+    scanner = null;
+  }
 }
 </script>
 </body>
