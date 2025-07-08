@@ -4,7 +4,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Entrega de Materiais</title>
+  <title>Login + Entrega de Materiais</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -23,6 +23,52 @@
       padding: 20px;
     }
 
+    /* TELA DE LOGIN */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .login-box h2 {
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .login-box input {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 250px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .login-box button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background-color: #0ef;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .hidden { display: none; }
+
+    /* SEU SISTEMA */
     .logo-text {
       font-size: 48px;
       font-weight: bold;
@@ -59,13 +105,8 @@
       outline: 2px solid #888;
     }
 
-    .aba {
-      display: none;
-    }
-
-    .aba.active {
-      display: block;
-    }
+    .aba { display: none; }
+    .aba.active { display: block; }
 
     .formulario {
       max-width: 500px;
@@ -83,14 +124,14 @@
     }
 
     input[type="text"],
-input[type="number"] {
-  width: 92%;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: 1px solid var(--cor-borda);
-  background: #f2e4c9 !important;
-  margin-top: 5px;
+    input[type="number"] {
+      width: 92%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--cor-borda);
+      background: #f2e4c9 !important;
+      margin-top: 5px;
     }
 
     .linha {
@@ -163,13 +204,8 @@ input[type="number"] {
       cursor: pointer;
     }
 
-    .acoes .editar {
-      background: #f0c674;
-    }
-
-    .acoes .excluir {
-      background: #f47c7c;
-    }
+    .acoes .editar { background: #f0c674; }
+    .acoes .excluir { background: #f47c7c; }
 
     #leitor-camera, #leitor-camera-transferencia {
       display: none;
@@ -181,77 +217,101 @@ input[type="number"] {
 </head>
 <body>
 
-  <div class="logo-text">Cremer</div>
-  <h1>ENTREGA DE MATERIAIS</h1>
-
-  <div class="tabs">
-    <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
-    <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
-  </div>
-
-  <!-- ABA USO -->
-  <div id="aba-uso" class="aba active">
-    <div class="formulario">
-      <label>Transação:</label>
-      <input type="text" id="transacao" maxlength="3">
-      <label>Centro de Custo:</label>
-      <input type="text" id="centro" maxlength="6">
-      <label>Solicitante:</label>
-      <input type="text" id="solicitante" maxlength="6">
-      <label>Responsável pelo Atendimento:</label>
-      <input type="text" id="responsavel" maxlength="6">
-      <label>Código do Material:</label>
-      <div class="linha">
-        <input type="text" id="codigo" maxlength="11">
-        <button onclick="toggleScanner('codigo', 'leitor-camera')">📷</button>
-      </div>
-      <div id="leitor-camera"></div>
-      <label>Quantidade:</label>
-      <div class="quantidade-control">
-        <button onclick="alterarQtd('quantidade', -1)">−</button>
-        <input type="number" id="quantidade" value="1" min="1">
-        <button onclick="alterarQtd('quantidade', 1)">+</button>
-      </div>
-      <button class="btn-principal" onclick="adicionarItem('uso')">Adicionar ao Carrinho</button>
-      <div class="carrinho" id="carrinhoUso"></div>
-      <button class="btn-principal" onclick="finalizarEntrega('uso')">Finalizar Entrega</button>
+  <!-- TELA DE LOGIN -->
+  <div class="login-container" id="telaLogin">
+    <div class="login-box">
+      <h2>Login</h2>
+      <input type="text" id="usuario" placeholder="Usuário" />
+      <input type="password" id="senha" placeholder="Senha" />
+      <button onclick="fazerLogin()">Entrar</button>
     </div>
   </div>
 
-  <!-- ABA TRANSFERENCIA -->
-  <div id="aba-transferencia" class="aba">
-    <div class="formulario">
-      <label>Armazém de Origem:</label>
-      <input type="text" id="origem">
-      <label>Armazém de Destino:</label>
-      <input type="text" id="destino">
-      <label>Solicitante:</label>
-      <input type="text" id="solicitanteTransf">
-      <label>Responsável pelo Atendimento:</label>
-      <input type="text" id="responsavelTransf">
-      <label>Código do Material:</label>
-      <div class="linha">
-        <input type="text" id="codigoTransf">
-        <button onclick="toggleScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
+  <!-- SISTEMA PRINCIPAL -->
+  <div id="sistema" class="hidden">
+    <div class="logo-text">Cremer</div>
+    <h1>ENTREGA DE MATERIAIS</h1>
+
+    <div class="tabs">
+      <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
+      <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
+    </div>
+
+    <!-- conteúdo mantido igual ao que você mandou -->
+    <!-- ABA USO -->
+    <div id="aba-uso" class="aba active">
+      <div class="formulario">
+        <label>Transação:</label>
+        <input type="text" id="transacao" maxlength="3">
+        <label>Centro de Custo:</label>
+        <input type="text" id="centro" maxlength="6">
+        <label>Solicitante:</label>
+        <input type="text" id="solicitante" maxlength="6">
+        <label>Responsável pelo Atendimento:</label>
+        <input type="text" id="responsavel" maxlength="6">
+        <label>Código do Material:</label>
+        <div class="linha">
+          <input type="text" id="codigo" maxlength="11">
+          <button onclick="toggleScanner('codigo', 'leitor-camera')">📷</button>
+        </div>
+        <div id="leitor-camera"></div>
+        <label>Quantidade:</label>
+        <div class="quantidade-control">
+          <button onclick="alterarQtd('quantidade', -1)">−</button>
+          <input type="number" id="quantidade" value="1" min="1">
+          <button onclick="alterarQtd('quantidade', 1)">+</button>
+        </div>
+        <button class="btn-principal" onclick="adicionarItem('uso')">Adicionar ao Carrinho</button>
+        <div class="carrinho" id="carrinhoUso"></div>
+        <button class="btn-principal" onclick="finalizarEntrega('uso')">Finalizar Entrega</button>
       </div>
-      <div id="leitor-camera-transferencia"></div>
-      <label>Quantidade:</label>
-      <div class="quantidade-control">
-        <button onclick="alterarQtd('quantidadeTransf', -1)">−</button>
-        <input type="number" id="quantidadeTransf" value="1" min="1">
-        <button onclick="alterarQtd('quantidadeTransf', 1)">+</button>
+    </div>
+
+    <!-- ABA TRANSFERENCIA -->
+    <div id="aba-transferencia" class="aba">
+      <div class="formulario">
+        <label>Armazém de Origem:</label>
+        <input type="text" id="origem">
+        <label>Armazém de Destino:</label>
+        <input type="text" id="destino">
+        <label>Solicitante:</label>
+        <input type="text" id="solicitanteTransf">
+        <label>Responsável pelo Atendimento:</label>
+        <input type="text" id="responsavelTransf">
+        <label>Código do Material:</label>
+        <div class="linha">
+          <input type="text" id="codigoTransf">
+          <button onclick="toggleScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
+        </div>
+        <div id="leitor-camera-transferencia"></div>
+        <label>Quantidade:</label>
+        <div class="quantidade-control">
+          <button onclick="alterarQtd('quantidadeTransf', -1)">−</button>
+          <input type="number" id="quantidadeTransf" value="1" min="1">
+          <button onclick="alterarQtd('quantidadeTransf', 1)">+</button>
+        </div>
+        <button class="btn-principal" onclick="adicionarItem('transf')">Adicionar ao Carrinho</button>
+        <div class="carrinho" id="carrinhoTransf"></div>
+        <button class="btn-principal" onclick="finalizarEntrega('transf')">Finalizar Transferência</button>
       </div>
-      <button class="btn-principal" onclick="adicionarItem('transf')">Adicionar ao Carrinho</button>
-      <div class="carrinho" id="carrinhoTransf"></div>
-      <button class="btn-principal" onclick="finalizarEntrega('transf')">Finalizar Transferência</button>
-     
     </div>
   </div>
 
 <script>
-  let carrinhoUso = [];
-  let carrinhoTransf = [];
-  let scanner = null;
+  // ===== LOGIN SIMPLES =====
+  function fazerLogin() {
+    const user = document.getElementById("usuario").value.trim();
+    const pass = document.getElementById("senha").value.trim();
+    if (user === "kaua" && pass === "123") {
+      document.getElementById("telaLogin").style.display = "none";
+      document.getElementById("sistema").classList.remove("hidden");
+    } else {
+      alert("Usuário ou senha incorretos.");
+    }
+  }
+
+  // ===== CÓDIGOS DO SISTEMA (MANTIDOS) =====
+  let carrinhoUso = [], carrinhoTransf = [], scanner = null;
 
   function mostrarAba(aba) {
     document.querySelectorAll(".aba").forEach(e => e.classList.remove("active"));
@@ -333,9 +393,7 @@ input[type="number"] {
   }
 
   function limparCampos(tipo) {
-    const campos = tipo === "uso" ?
-      ["codigo", "quantidade"] :
-      ["codigoTransf", "quantidadeTransf"];
+    const campos = tipo === "uso" ? ["codigo", "quantidade"] : ["codigoTransf", "quantidadeTransf"];
     campos.forEach(id => document.getElementById(id).value = id.includes("quantidade") ? 1 : "");
   }
 
@@ -346,7 +404,6 @@ input[type="number"] {
   function toggleScanner(campo, divId) {
     const div = document.getElementById(divId);
     if (div.style.display === "block") return fecharScanner();
-
     fecharScanner();
     div.style.display = "block";
     scanner = new Html5Qrcode(divId);
