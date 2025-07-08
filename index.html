@@ -1,182 +1,832 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login e Entrega de Materiais</title>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <title>Entrega de Materiais - Sistema Completo</title>
   <style>
-    :root {
-      --cor-degrade: linear-gradient(135deg, #2CD3A4, #00298C);
-      --cor-bege-degrade: linear-gradient(135deg, #f3e9d2, #fff9e5);
-      --cor-borda: rgba(0, 0, 0, 0.1);
-      --fonte-principal: Arial, sans-serif;
+    /* Reset */
+    * {
+      box-sizing: border-box;
     }
-    body {
-      margin: 0;
-      font-family: var(--fonte-principal);
-      background: var(--cor-degrade);
-      color: #333;
-      padding: 20px;
+
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1e8e5f, #2c70b8);
+      color: white;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
-    .logo-text {
-      font-size: 48px;
-      font-weight: bold;
+
+    /* Logo top */
+    #logo {
       text-align: center;
-      color: #36f7ee;
-      font-family: 'Pacifico', cursive;
-      margin-bottom: 0;
+      padding: 15px 0;
+      background: rgba(0,0,0,0.15);
+    }
+    #logo img {
+      height: 60px;
       user-select: none;
     }
-    .tabs button.active {
-      opacity: 1;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      filter: drop-shadow(0 0 8px rgba(0,0,0,0.4));
-    }
-    .tabs {
+
+    /* Login screen */
+    #login-screen {
+      flex: 1;
       display: flex;
+      flex-direction: column;
       justify-content: center;
-      gap: 10px;
+      align-items: center;
+      background: rgba(0,0,0,0.3);
+    }
+    #login-screen input {
+      padding: 10px;
+      margin: 10px 0;
+      width: 280px;
+      border-radius: 4px;
+      border: none;
+      font-size: 16px;
+    }
+    #login-screen button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      background: #2c70b8;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #login-screen button:hover {
+      background: #1e8e5f;
+    }
+
+    /* Container principal após login */
+    #app {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    /* Navegação abas */
+    nav {
+      display: flex;
+      background: rgba(0,0,0,0.25);
+      justify-content: center;
+    }
+    nav button {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 15px;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    nav button.active, nav button:hover {
+      background: rgba(255,255,255,0.2);
+      font-weight: bold;
+    }
+
+    /* Conteúdo abas */
+    .tab-content {
+      flex: 1;
+      padding: 20px;
+      display: none;
+      overflow-y: auto;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Campos */
+    .field-group {
       margin-bottom: 15px;
     }
-    .tabs button {
-      background: var(--cor-bege-degrade);
+    .field-group label {
+      display: block;
+      margin-bottom: 6px;
       font-weight: bold;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      opacity: 0.6;
-      box-shadow: none;
     }
-    .aba { display: none; }
-    .aba.active { display: block; }
-    .formulario {
-      max-width: 500px;
-      margin: 0 auto;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .carrinho {
-      background: rgba(255,255,255,0.8);
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 10px;
-    }
-    .btn-principal {
+    .field-group input[type=text], .field-group input[type=number] {
       width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-      background: var(--cor-bege-degrade);
+      padding: 8px;
+      border-radius: 4px;
       border: none;
-      border-radius: 10px;
+      font-size: 15px;
+    }
+
+    /* Scanner */
+    #scanner-container {
+      position: relative;
+      margin: 10px 0 20px;
+      text-align: center;
+    }
+    #scanner {
+      max-width: 100%;
+      border-radius: 8px;
+      display: none;
+      margin: 0 auto;
+      border: 3px solid #1e8e5f;
+    }
+    #btn-toggle-scanner {
+      background: #1e8e5f;
+      border: none;
+      color: white;
+      padding: 8px 15px;
       font-weight: bold;
+      border-radius: 5px;
       cursor: pointer;
+      margin-top: 10px;
+      user-select: none;
+    }
+    #btn-toggle-scanner.active {
+      background: #2c70b8;
+    }
+
+    /* Carrinho */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      color: white;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      text-align: left;
+    }
+    th {
+      background: rgba(0,0,0,0.3);
+    }
+    td.actions {
+      text-align: center;
+    }
+    button.action-btn {
+      background: transparent;
+      border: none;
+      color: #ff5555;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 0 5px;
+    }
+    button.action-btn:hover {
+      color: #ff0000;
+    }
+
+    /* Botão finalizar */
+    #finalizar-btn {
+      margin-top: 20px;
+      background: #2c70b8;
+      border: none;
+      padding: 12px 25px;
+      font-size: 18px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    #finalizar-btn:hover {
+      background: #1e8e5f;
+    }
+
+    /* Mensagem erro */
+    #error-msg {
+      color: #ff4444;
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: center;
     }
   </style>
 </head>
+
 <body>
-  <div class="logo-text">Cremer</div>
-  <div class="tabs">
-    <button id="btn-uso" onclick="mostrarAba('uso')">Uso Consumo</button>
-    <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
-    <button id="btn-conferencia" onclick="mostrarAba('conferencia')">Conferência Carregamento</button>
+  <div id="login-screen">
+    <h2>Entrar no Sistema</h2>
+    <input type="text" id="login-user" placeholder="Usuário" autocomplete="username" />
+    <input type="password" id="login-pass" placeholder="Senha" autocomplete="current-password" />
+    <button id="btn-login">Entrar</button>
+    <div id="login-error" style="color:#ff6666; margin-top:8px; display:none;"></div>
   </div>
 
-  <div id="aba-conferencia" class="aba active">
-    <div class="formulario">
-      <label>Código do Material:</label>
-      <div class="linha">
-        <input type="text" id="codigoConf" oninput="adicionarCodigoConferencia(this.value)" />
-        <button onclick="toggleScannerConferencia()">📷</button>
-      </div>
-      <div id="leitor-camera-conferencia" style="display:none; margin-top:10px;"></div>
-      <div class="carrinho" id="carrinhoConferencia"></div>
-      <button class="btn-principal" onclick="finalizarConferencia()">Finalizar Conferência</button>
+  <div id="app">
+    <div id="logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/92/Cremer_logo.svg" alt="Logo Cremer" />
     </div>
+
+    <nav>
+      <button class="tab-btn active" data-tab="uso">Uso Consumo</button>
+      <button class="tab-btn" data-tab="transferencia">Transferência</button>
+      <button class="tab-btn" data-tab="conferencia">Conferência Carregamento Terceiro</button>
+    </nav>
+
+    <!-- Uso Consumo -->
+    <section id="uso" class="tab-content active">
+      <div class="field-group">
+        <label for="uso-codigo">Código do Material</label>
+        <input type="text" id="uso-codigo" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label for="uso-descricao">Descrição</label>
+        <input type="text" id="uso-descricao" disabled />
+      </div>
+      <div class="field-group">
+        <label for="uso-quantidade">Quantidade</label>
+        <input type="number" id="uso-quantidade" min="1" value="1" />
+      </div>
+      <div class="field-group">
+        <label for="uso-transacao">Transação (3 caracteres)</label>
+        <input type="text" id="uso-transacao" maxlength="3" />
+      </div>
+      <div class="field-group">
+        <label for="uso-centro-custo">Centro de Custo (6 caracteres)</label>
+        <input type="text" id="uso-centro-custo" maxlength="6" />
+      </div>
+      <div class="field-group">
+        <label for="uso-solicitante">Solicitante</label>
+        <input type="text" id="uso-solicitante" />
+      </div>
+      <div class="field-group">
+        <label for="uso-responsavel">Responsável pelo Atendimento</label>
+        <input type="text" id="uso-responsavel" />
+      </div>
+
+      <div id="scanner-container-uso">
+        <button id="btn-toggle-scanner-uso">Abrir Scanner</button><br/>
+        <video id="scanner-uso"></video>
+      </div>
+
+      <button id="btn-add-uso">Adicionar ao Carrinho</button>
+
+      <table id="carrinho-uso" style="margin-top:20px;">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descrição</th>
+            <th>Qtd</th>
+            <th>Transação</th>
+            <th>Centro de Custo</th>
+            <th>Solicitante</th>
+            <th>Responsável</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <button id="finalizar-uso" class="finalizar-btn">Finalizar e Baixar</button>
+      <div id="error-msg-uso"></div>
+    </section>
+
+    <!-- Transferência -->
+    <section id="transferencia" class="tab-content">
+      <div class="field-group">
+        <label for="transf-codigo">Código do Material</label>
+        <input type="text" id="transf-codigo" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label for="transf-descricao">Descrição</label>
+        <input type="text" id="transf-descricao" disabled />
+      </div>
+      <div class="field-group">
+        <label for="transf-quantidade">Quantidade</label>
+        <input type="number" id="transf-quantidade" min="1" value="1" />
+      </div>
+      <div class="field-group">
+        <label for="transf-armazem-origem">Armazém de Origem</label>
+        <input type="text" id="transf-armazem-origem" />
+      </div>
+      <div class="field-group">
+        <label for="transf-armazem-destino">Armazém de Destino</label>
+        <input type="text" id="transf-armazem-destino" />
+      </div>
+      <div class="field-group">
+        <label for="transf-solicitante">Solicitante</label>
+        <input type="text" id="transf-solicitante" />
+      </div>
+      <div class="field-group">
+        <label for="transf-responsavel">Responsável pelo Atendimento</label>
+        <input type="text" id="transf-responsavel" />
+      </div>
+
+      <div id="scanner-container-transf">
+        <button id="btn-toggle-scanner-transf">Abrir Scanner</button><br/>
+        <video id="scanner-transf"></video>
+      </div>
+
+      <button id="btn-add-transf">Adicionar ao Carrinho</button>
+
+      <table id="carrinho-transf" style="margin-top:20px;">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descrição</th>
+            <th>Qtd</th>
+            <th>Armazém Origem</th>
+            <th>Armazém Destino</th>
+            <th>Solicitante</th>
+            <th>Responsável</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <button id="finalizar-transf" class="finalizar-btn">Finalizar e Baixar</button>
+      <div id="error-msg-transf"></div>
+    </section>
+
+    <!-- Conferência Carregamento Terceiro -->
+    <section id="conferencia" class="tab-content">
+      <div class="field-group" style="text-align:center;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/92/Cremer_logo.svg" alt="Logo Cremer" style="height: 70px; margin-bottom: 15px;"/>
+      </div>
+
+      <div class="field-group">
+        <label for="conf-codigo">Código do Material</label>
+        <input type="text" id="conf-codigo" autocomplete="off" />
+      </div>
+
+      <div id="scanner-container-conf" style="text-align:center;">
+        <button id="btn-toggle-scanner-conf">Abrir Scanner</button><br/>
+        <video id="scanner-conf"></video>
+      </div>
+
+      <table id="carrinho-conf" style="margin-top:20px;">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Qtd</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <button id="finalizar-conf" class="finalizar-btn">Finalizar e Baixar</button>
+      <div id="error-msg-conf"></div>
+    </section>
   </div>
 
+  <!-- Scripts -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
-    let carrinhoConferencia = [];
-    let scannerConf = null;
+    // ======= Login =======
+    const loginScreen = document.getElementById('login-screen');
+    const app = document.getElementById('app');
+    const btnLogin = document.getElementById('btn-login');
+    const loginError = document.getElementById('login-error');
 
-    function mostrarAba(aba) {
-      document.querySelectorAll(".aba").forEach(e => e.classList.remove("active"));
-      document.querySelectorAll(".tabs button").forEach(e => e.classList.remove("active"));
-      document.getElementById("aba-" + aba).classList.add("active");
-      document.getElementById("btn-" + aba).classList.add("active");
-    }
+    // Simples usuário e senha fixos para exemplo
+    const USER = 'usuario';
+    const PASS = '1234';
 
-    function adicionarCodigoConferencia(codigo) {
-      if (!codigo.trim()) return;
-      const idx = carrinhoConferencia.findIndex(i => i.codigo === codigo);
-      if (idx >= 0) {
-        carrinhoConferencia[idx].quantidade++;
+    btnLogin.addEventListener('click', () => {
+      const user = document.getElementById('login-user').value.trim();
+      const pass = document.getElementById('login-pass').value.trim();
+      if(user === USER && pass === PASS){
+        loginScreen.style.display = 'none';
+        app.style.display = 'flex';
       } else {
-        carrinhoConferencia.push({ codigo: codigo.trim(), quantidade: 1 });
+        loginError.style.display = 'block';
+        loginError.textContent = 'Usuário ou senha incorretos';
       }
-      document.getElementById('codigoConf').value = '';
-      renderCarrinhoConferencia();
-    }
+    });
 
-    function renderCarrinhoConferencia() {
-      const div = document.getElementById("carrinhoConferencia");
-      div.innerHTML = "<strong>Itens:</strong>" + carrinhoConferencia.map((item, i) =>
-        `<div class="carrinho-item">
-          <span>${item.codigo} – ${item.quantidade}</span>
-        </div>`).join("");
-    }
-
-    function finalizarConferencia() {
-      if (carrinhoConferencia.length === 0) return alert("Carrinho vazio.");
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(carrinhoConferencia);
-      XLSX.utils.book_append_sheet(wb, ws, "Conferencia");
-      XLSX.writeFile(wb, "ConferenciaCarregamento.xlsx");
-      carrinhoConferencia = [];
-      renderCarrinhoConferencia();
-    }
-
-    function toggleScannerConferencia() {
-      const divId = "leitor-camera-conferencia";
-      const div = document.getElementById(divId);
-      if (div.style.display === "block") {
-        fecharScannerConf();
-        return;
+    // Enter no campo senha entra
+    document.getElementById('login-pass').addEventListener('keydown', e=>{
+      if(e.key === 'Enter'){
+        btnLogin.click();
       }
-      fecharScannerConf();
-      div.style.display = "block";
-      scannerConf = new Html5Qrcode(divId);
-      Html5Qrcode.getCameras().then(cameras => {
-        const camId = cameras.find(c => c.label.toLowerCase().includes("back"))?.id || cameras[0].id;
-        scannerConf.start(camId, { fps: 10, qrbox: 250 }, msg => {
-          adicionarCodigoConferencia(msg);
-        }).catch(err => console.log("Erro ao iniciar câmera:", err));
-      }).catch(err => {
-        alert("Câmera não encontrada: " + err);
-        fecharScannerConf();
+    });
+
+    // ======= Abas =======
+    const tabs = document.querySelectorAll('nav button.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(btn=>{
+      btn.addEventListener('click', () => {
+        tabs.forEach(b=>b.classList.remove('active'));
+        tabContents.forEach(c=>c.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        document.getElementById(tab).classList.add('active');
+        stopAllScanners();
+      });
+    });
+
+    // ======= Scanner =======
+    // Gerencia vários scanners ao mesmo tempo para as 3 abas
+    let scannerUso = null, scannerTransf = null, scannerConf = null;
+
+    function stopAllScanners() {
+      if(scannerUso) {scannerUso.stop(); scannerUso=null;}
+      if(scannerTransf) {scannerTransf.stop(); scannerTransf=null;}
+      if(scannerConf) {scannerConf.stop(); scannerConf=null;}
+      toggleScannerButton('uso', false);
+      toggleScannerButton('transf', false);
+      toggleScannerButton('conf', false);
+      hideScanner('uso');
+      hideScanner('transf');
+      hideScanner('conf');
+    }
+
+    function toggleScannerButton(tab, on) {
+      let btn;
+      if(tab==='uso') btn = document.getElementById('btn-toggle-scanner-uso');
+      else if(tab==='transf') btn = document.getElementById('btn-toggle-scanner-transf');
+      else if(tab==='conf') btn = document.getElementById('btn-toggle-scanner-conf');
+      if(!btn) return;
+      if(on) btn.classList.add('active');
+      else btn.classList.remove('active');
+    }
+
+    function showScanner(tab) {
+      let video;
+      if(tab==='uso') video = document.getElementById('scanner-uso');
+      else if(tab==='transf') video = document.getElementById('scanner-transf');
+      else if(tab==='conf') video = document.getElementById('scanner-conf');
+      if(video) video.style.display = 'block';
+    }
+
+    function hideScanner(tab) {
+      let video;
+      if(tab==='uso') video = document.getElementById('scanner-uso');
+      else if(tab==='transf') video = document.getElementById('scanner-transf');
+      else if(tab==='conf') video = document.getElementById('scanner-conf');
+      if(video) video.style.display = 'none';
+    }
+
+    // Função comum para iniciar scanner HTML5-qrcode
+    function startScanner(tab, inputId) {
+      stopAllScanners();
+      let videoElem, scannerInstance;
+      if(tab==='uso') {
+        videoElem = document.getElementById('scanner-uso');
+      } else if(tab==='transf') {
+        videoElem = document.getElementById('scanner-transf');
+      } else if(tab==='conf') {
+        videoElem = document.getElementById('scanner-conf');
+      }
+      if(!videoElem) return;
+
+      showScanner(tab);
+      toggleScannerButton(tab,true);
+
+      scannerInstance = new Html5Qrcode(/* element id */ videoElem.id);
+
+      const config = { fps: 10, qrbox: 250 };
+
+      scannerInstance.start(
+        { facingMode: "environment" },
+        config,
+        qrCodeMessage => {
+          // Coloca o código escaneado no input correspondente
+          const input = document.getElementById(inputId);
+          if(input) {
+            if(tab === 'conf') {
+              // Na conferência, adiciona ao carrinho +1 no mesmo código
+              addToCartConf(qrCodeMessage.trim());
+            } else {
+              input.value = qrCodeMessage.trim();
+            }
+          }
+          stopAllScanners();
+        },
+        errorMessage => {
+          // console.log(`Scan error: ${errorMessage}`);
+        }
+      ).catch(err => {
+        alert("Erro ao iniciar o scanner: " + err);
+        toggleScannerButton(tab,false);
+        hideScanner(tab);
+      });
+
+      // Guarda scanner para parar depois
+      if(tab==='uso') scannerUso = scannerInstance;
+      else if(tab==='transf') scannerTransf = scannerInstance;
+      else if(tab==='conf') scannerConf = scannerInstance;
+    }
+
+    // Toggle scanner buttons
+    document.getElementById('btn-toggle-scanner-uso').addEventListener('click', () => {
+      if(scannerUso) {
+        scannerUso.stop();
+        scannerUso=null;
+        toggleScannerButton('uso', false);
+        hideScanner('uso');
+      } else {
+        startScanner('uso','uso-codigo');
+      }
+    });
+    document.getElementById('btn-toggle-scanner-transf').addEventListener('click', () => {
+      if(scannerTransf) {
+        scannerTransf.stop();
+        scannerTransf=null;
+        toggleScannerButton('transf', false);
+        hideScanner('transf');
+      } else {
+        startScanner('transf','transf-codigo');
+      }
+    });
+    document.getElementById('btn-toggle-scanner-conf').addEventListener('click', () => {
+      if(scannerConf) {
+        scannerConf.stop();
+        scannerConf=null;
+        toggleScannerButton('conf', false);
+        hideScanner('conf');
+      } else {
+        startScanner('conf','conf-codigo');
+      }
+    });
+
+    // ======= Busca descrição (exemplo fictício) =======
+    // Você pode substituir essa função por sua API real
+    async function buscarDescricao(codigo) {
+      // Simulação de busca
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (!codigo) resolve('');
+          else resolve("Descrição para código " + codigo);
+        }, 300);
       });
     }
 
-    function fecharScannerConf() {
-      if (scannerConf) {
-        scannerConf.stop().then(() => {
-          scannerConf.clear();
-          scannerConf = null;
-          document.getElementById("leitor-camera-conferencia").style.display = "none";
-        });
-      } else {
-        document.getElementById("leitor-camera-conferencia").style.display = "none";
+    // Atualiza descrição ao mudar código (uso e transf)
+    document.getElementById('uso-codigo').addEventListener('change', async e=>{
+      const desc = await buscarDescricao(e.target.value.trim());
+      document.getElementById('uso-descricao').value = desc;
+    });
+    document.getElementById('transf-codigo').addEventListener('change', async e=>{
+      const desc = await buscarDescricao(e.target.value.trim());
+      document.getElementById('transf-descricao').value = desc;
+    });
+
+    // ======= Carrinho Uso Consumo =======
+    const carrinhoUso = [];
+
+    function renderCarrinhoUso() {
+      const tbody = document.querySelector('#carrinho-uso tbody');
+      tbody.innerHTML = '';
+      for(let i=0; i<carrinhoUso.length; i++) {
+        const item = carrinhoUso[i];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.codigo}</td>
+          <td>${item.descricao}</td>
+          <td><input type="number" min="1" value="${item.quantidade}" data-index="${i}" class="edit-qtd-uso" style="width:60px;"/></td>
+          <td>${item.transacao}</td>
+          <td>${item.centroCusto}</td>
+          <td>${item.solicitante}</td>
+          <td>${item.responsavel}</td>
+          <td class="actions"><button class="action-btn" data-index="${i}" data-action="remover-uso">×</button></td>
+        `;
+        tbody.appendChild(tr);
       }
+      // Eventos para editar quantidade e remover
+      document.querySelectorAll('.edit-qtd-uso').forEach(input=>{
+        input.addEventListener('change', e=>{
+          const idx = e.target.getAttribute('data-index');
+          let val = parseInt(e.target.value);
+          if(isNaN(val) || val < 1) val = 1;
+          carrinhoUso[idx].quantidade = val;
+          renderCarrinhoUso();
+        });
+      });
+      document.querySelectorAll('button[data-action="remover-uso"]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const idx = e.target.getAttribute('data-index');
+          carrinhoUso.splice(idx,1);
+          renderCarrinhoUso();
+        });
+      });
+    }
+
+    document.getElementById('btn-add-uso').addEventListener('click', () => {
+      const codigo = document.getElementById('uso-codigo').value.trim();
+      const descricao = document.getElementById('uso-descricao').value.trim();
+      const quantidade = parseInt(document.getElementById('uso-quantidade').value);
+      const transacao = document.getElementById('uso-transacao').value.trim();
+      const centroCusto = document.getElementById('uso-centro-custo').value.trim();
+      const solicitante = document.getElementById('uso-solicitante').value.trim();
+      const responsavel = document.getElementById('uso-responsavel').value.trim();
+
+      if(!codigo || !descricao || !quantidade || !transacao || !centroCusto || !solicitante || !responsavel){
+        document.getElementById('error-msg-uso').textContent = 'Preencha todos os campos antes de adicionar.';
+        return;
+      }
+      if(transacao.length !== 3) {
+        document.getElementById('error-msg-uso').textContent = 'Transação deve ter exatamente 3 caracteres.';
+        return;
+      }
+      if(centroCusto.length !== 6) {
+        document.getElementById('error-msg-uso').textContent = 'Centro de Custo deve ter exatamente 6 caracteres.';
+        return;
+      }
+      if(quantidade < 1) {
+        document.getElementById('error-msg-uso').textContent = 'Quantidade deve ser maior que zero.';
+        return;
+      }
+
+      document.getElementById('error-msg-uso').textContent = '';
+
+      carrinhoUso.push({codigo, descricao, quantidade, transacao, centroCusto, solicitante, responsavel});
+      renderCarrinhoUso();
+
+      // Limpar campos exceto descrição (pode deixar para facilitar entrada repetida)
+      document.getElementById('uso-codigo').value = '';
+      document.getElementById('uso-descricao').value = '';
+      document.getElementById('uso-quantidade').value = 1;
+      document.getElementById('uso-transacao').value = '';
+      document.getElementById('uso-centro-custo').value = '';
+      document.getElementById('uso-solicitante').value = '';
+      document.getElementById('uso-responsavel').value = '';
+    });
+
+    document.getElementById('finalizar-uso').addEventListener('click', () => {
+      if(carrinhoUso.length === 0){
+        alert('Carrinho vazio! Adicione itens antes de finalizar.');
+        return;
+      }
+      // Gera CSV simples para download
+      let csv = 'Código;Descrição;Quantidade;Transação;Centro de Custo;Solicitante;Responsável\n';
+      for(let item of carrinhoUso){
+        csv += `${item.codigo};${item.descricao};${item.quantidade};${item.transacao};${item.centroCusto};${item.solicitante};${item.responsavel}\n`;
+      }
+      downloadCSV(csv, 'uso_consumo.csv');
+      carrinhoUso.length = 0;
+      renderCarrinhoUso();
+    });
+
+    // ======= Carrinho Transferência =======
+    const carrinhoTransf = [];
+
+    function renderCarrinhoTransf() {
+      const tbody = document.querySelector('#carrinho-transf tbody');
+      tbody.innerHTML = '';
+      for(let i=0; i<carrinhoTransf.length; i++) {
+        const item = carrinhoTransf[i];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.codigo}</td>
+          <td>${item.descricao}</td>
+          <td><input type="number" min="1" value="${item.quantidade}" data-index="${i}" class="edit-qtd-transf" style="width:60px;"/></td>
+          <td>${item.armazemOrigem}</td>
+          <td>${item.armazemDestino}</td>
+          <td>${item.solicitante}</td>
+          <td>${item.responsavel}</td>
+          <td class="actions"><button class="action-btn" data-index="${i}" data-action="remover-transf">×</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+      document.querySelectorAll('.edit-qtd-transf').forEach(input=>{
+        input.addEventListener('change', e=>{
+          const idx = e.target.getAttribute('data-index');
+          let val = parseInt(e.target.value);
+          if(isNaN(val) || val < 1) val = 1;
+          carrinhoTransf[idx].quantidade = val;
+          renderCarrinhoTransf();
+        });
+      });
+      document.querySelectorAll('button[data-action="remover-transf"]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const idx = e.target.getAttribute('data-index');
+          carrinhoTransf.splice(idx,1);
+          renderCarrinhoTransf();
+        });
+      });
+    }
+
+    document.getElementById('btn-add-transf').addEventListener('click', () => {
+      const codigo = document.getElementById('transf-codigo').value.trim();
+      const descricao = document.getElementById('transf-descricao').value.trim();
+      const quantidade = parseInt(document.getElementById('transf-quantidade').value);
+      const armazemOrigem = document.getElementById('transf-armazem-origem').value.trim();
+      const armazemDestino = document.getElementById('transf-armazem-destino').value.trim();
+      const solicitante = document.getElementById('transf-solicitante').value.trim();
+      const responsavel = document.getElementById('transf-responsavel').value.trim();
+
+      if(!codigo || !descricao || !quantidade || !armazemOrigem || !armazemDestino || !solicitante || !responsavel){
+        document.getElementById('error-msg-transf').textContent = 'Preencha todos os campos antes de adicionar.';
+        return;
+      }
+      if(quantidade < 1) {
+        document.getElementById('error-msg-transf').textContent = 'Quantidade deve ser maior que zero.';
+        return;
+      }
+
+      document.getElementById('error-msg-transf').textContent = '';
+
+      carrinhoTransf.push({codigo, descricao, quantidade, armazemOrigem, armazemDestino, solicitante, responsavel});
+      renderCarrinhoTransf();
+
+      document.getElementById('transf-codigo').value = '';
+      document.getElementById('transf-descricao').value = '';
+      document.getElementById('transf-quantidade').value = 1;
+      document.getElementById('transf-armazem-origem').value = '';
+      document.getElementById('transf-armazem-destino').value = '';
+      document.getElementById('transf-solicitante').value = '';
+      document.getElementById('transf-responsavel').value = '';
+    });
+
+    document.getElementById('finalizar-transf').addEventListener('click', () => {
+      if(carrinhoTransf.length === 0){
+        alert('Carrinho vazio! Adicione itens antes de finalizar.');
+        return;
+      }
+      let csv = 'Código;Descrição;Quantidade;Armazém Origem;Armazém Destino;Solicitante;Responsável\n';
+      for(let item of carrinhoTransf){
+        csv += `${item.codigo};${item.descricao};${item.quantidade};${item.armazemOrigem};${item.armazemDestino};${item.solicitante};${item.responsavel}\n`;
+      }
+      downloadCSV(csv, 'transferencia.csv');
+      carrinhoTransf.length = 0;
+      renderCarrinhoTransf();
+    });
+
+    // ======= Carrinho Conferência =======
+    const carrinhoConf = [];
+
+    function renderCarrinhoConf() {
+      const tbody = document.querySelector('#carrinho-conf tbody');
+      tbody.innerHTML = '';
+      for(let i=0; i<carrinhoConf.length; i++) {
+        const item = carrinhoConf[i];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.codigo}</td>
+          <td>${item.quantidade}</td>
+          <td class="actions"><button class="action-btn" data-index="${i}" data-action="remover-conf">×</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+      document.querySelectorAll('button[data-action="remover-conf"]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const idx = e.target.getAttribute('data-index');
+          carrinhoConf.splice(idx,1);
+          renderCarrinhoConf();
+        });
+      });
+    }
+
+    // Função para adicionar na conferência, somando +1 se código repetido
+    function addToCartConf(codigo) {
+      if(!codigo) return;
+      const idx = carrinhoConf.findIndex(i => i.codigo === codigo);
+      if(idx >= 0) {
+        carrinhoConf[idx].quantidade++;
+      } else {
+        carrinhoConf.push({codigo, quantidade: 1});
+      }
+      renderCarrinhoConf();
+      document.getElementById('conf-codigo').value = '';
+    }
+
+    // Entrada manual adiciona no carrinho
+    document.getElementById('conf-codigo').addEventListener('keydown', e=>{
+      if(e.key === 'Enter'){
+        const val = e.target.value.trim();
+        if(val) addToCartConf(val);
+      }
+    });
+
+    // Botão adicionar não existe na aba conferência pois a adição é automática via scanner ou enter
+
+    document.getElementById('finalizar-conf').addEventListener('click', () => {
+      if(carrinhoConf.length === 0){
+        alert('Carrinho vazio! Adicione itens antes de finalizar.');
+        return;
+      }
+      let csv = 'Código;Quantidade\n';
+      for(let item of carrinhoConf){
+        csv += `${item.codigo};${item.quantidade}\n`;
+      }
+      downloadCSV(csv, 'conferencia_carregamento.csv');
+      carrinhoConf.length = 0;
+      renderCarrinhoConf();
+    });
+
+    // ======= Download CSV =======
+    function downloadCSV(content, filename){
+      const blob = new Blob([content], {type: 'text/csv;charset=utf-8;'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   </script>
 </body>
+
 </html>
