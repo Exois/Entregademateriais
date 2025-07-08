@@ -23,6 +23,16 @@
       padding: 20px;
     }
 
+    /* Logo texto estilo */
+    .logo-text {
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
+      color: #36f7ee;
+      font-family: 'Pacifico', cursive;
+      margin-bottom: 0;
+    }
+
     /* ====== LOGIN ====== */
     #telaLogin {
       display: flex;
@@ -33,11 +43,6 @@
       background: var(--cor-degrade);
       color: #fff;
       text-align: center;
-    }
-
-    #telaLogin img {
-      width: 180px;
-      margin-bottom: 20px;
     }
 
     #telaLogin input {
@@ -71,15 +76,6 @@
     /* ====== SISTEMA ====== */
     #sistema {
       display: none;
-    }
-
-    .logo-text {
-      font-size: 48px;
-      font-weight: bold;
-      text-align: center;
-      color: #36f7ee;
-      font-family: 'Pacifico', cursive;
-      margin-bottom: 0;
     }
 
     h1 {
@@ -236,14 +232,13 @@
       font-size: 14px;
       font-style: italic;
     }
-
   </style>
 </head>
 <body>
 
   <!-- TELA LOGIN -->
   <div id="telaLogin">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cremer_Logo.png" alt="Logo Cremer" />
+    <div class="logo-text">Cremer</div>
     <input type="text" id="usuario" placeholder="Usuário / Cadastro" />
     <input type="password" id="senha" placeholder="Senha" />
     <button onclick="fazerLogin()">Entrar</button>
@@ -251,9 +246,6 @@
 
   <!-- SISTEMA -->
   <div id="sistema">
-    <div style="text-align:center; margin-bottom:10px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cremer_Logo.png" alt="Logo Cremer" style="width:200px;" />
-    </div>
     <div class="logo-text">Cremer</div>
     <h1>ENTREGA DE MATERIAIS</h1>
 
@@ -324,7 +316,7 @@
   </div>
 
   <script>
-    // Login simples, sem segurança real
+    // Login simples (sem segurança real)
     function fazerLogin() {
       const usuario = document.getElementById("usuario").value.trim();
       const senha = document.getElementById("senha").value.trim();
@@ -334,17 +326,12 @@
         return;
       }
 
-      // Qualquer usuário/senha válido deixa entrar (sem segurança)
+      // Esconde login e mostra sistema
       document.getElementById("telaLogin").style.display = "none";
       document.getElementById("sistema").style.display = "block";
     }
 
-    // Funções do sistema principal (idênticas ao seu código original)
-
-    let carrinhoUso = [];
-    let carrinhoTransf = [];
-    let scanner = null;
-
+    // Mostrar abas
     function mostrarAba(aba) {
       document.querySelectorAll(".aba").forEach(e => e.classList.remove("active"));
       document.querySelectorAll(".tabs button").forEach(e => e.classList.remove("active"));
@@ -353,12 +340,18 @@
       fecharScanner();
     }
 
+    // Controlar quantidade com + e -
     function alterarQtd(id, val) {
       const input = document.getElementById(id);
       let v = parseInt(input.value) || 1;
       v = Math.max(1, v + val);
       input.value = v;
     }
+
+    // Adicionar item ao carrinho (uso ou transf)
+    let carrinhoUso = [];
+    let carrinhoTransf = [];
+    let scanner = null;
 
     function adicionarItem(tipo) {
       const item = tipo === "uso" ? {
@@ -378,13 +371,17 @@
       };
 
       const campos = Object.values(item);
-      if (campos.some(v => !v)) return alert("Preencha todos os campos.");
+      if (campos.some(v => !v)) {
+        alert("Preencha todos os campos.");
+        return;
+      }
 
       (tipo === "uso" ? carrinhoUso : carrinhoTransf).push(item);
       renderCarrinho(tipo);
       limparCampos(tipo);
     }
 
+    // Renderizar carrinho
     function renderCarrinho(tipo) {
       const div = document.getElementById(tipo === "uso" ? "carrinhoUso" : "carrinhoTransf");
       const carrinho = tipo === "uso" ? carrinhoUso : carrinhoTransf;
@@ -398,6 +395,7 @@
         </div>`).join("");
     }
 
+    // Editar item do carrinho
     function editarItem(tipo, i) {
       const item = (tipo === "uso" ? carrinhoUso : carrinhoTransf)[i];
       Object.entries(item).forEach(([k, v]) => {
@@ -408,22 +406,29 @@
       renderCarrinho(tipo);
     }
 
+    // Excluir item do carrinho
     function excluirItem(tipo, i) {
       (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
       renderCarrinho(tipo);
     }
 
+    // Finalizar entrega (gera arquivo Excel)
     function finalizarEntrega(tipo) {
       const dados = tipo === "uso" ? carrinhoUso : carrinhoTransf;
-      if (dados.length === 0) return alert("Carrinho vazio.");
+      if (dados.length === 0) {
+        alert("Carrinho vazio.");
+        return;
+      }
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(dados);
       XLSX.utils.book_append_sheet(wb, ws, tipo);
       XLSX.writeFile(wb, tipo === "uso" ? "UsoConsumo.xlsx" : "Transferencia.xlsx");
+
       if (tipo === "uso") carrinhoUso = []; else carrinhoTransf = [];
       renderCarrinho(tipo);
     }
 
+    // Limpar campos após adicionar
     function limparCampos(tipo) {
       const campos = tipo === "uso" ?
         ["codigo", "quantidade"] :
@@ -431,10 +436,12 @@
       campos.forEach(id => document.getElementById(id).value = id.includes("quantidade") ? 1 : "");
     }
 
+    // Obter valor do input
     function getVal(id) {
       return document.getElementById(id)?.value.trim();
     }
 
+    // Abrir/fechar scanner QR code
     function toggleScanner(campo, divId) {
       const div = document.getElementById(divId);
       if (div.style.display === "block") return fecharScanner();
@@ -451,6 +458,7 @@
       });
     }
 
+    // Fechar scanner
     function fecharScanner() {
       document.querySelectorAll("#leitor-camera, #leitor-camera-transferencia").forEach(e => e.style.display = "none");
       if (scanner) scanner.stop().then(() => scanner.clear());
