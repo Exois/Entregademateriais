@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Entrega de Materiais - Login</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <title>Login e Entrega de Materiais</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
   <style>
     :root {
       --cor-degrade: linear-gradient(135deg, #2CD3A4, #00298C);
@@ -14,16 +12,16 @@
       --cor-borda: rgba(0, 0, 0, 0.1);
       --fonte-principal: Arial, sans-serif;
     }
-
     body {
       margin: 0;
       font-family: var(--fonte-principal);
       background: var(--cor-degrade);
       color: #333;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
-
-    /* Logo texto estilo */
     .logo-text {
       font-size: 48px;
       font-weight: bold;
@@ -31,67 +29,88 @@
       color: #36f7ee;
       font-family: 'Pacifico', cursive;
       margin-bottom: 0;
+      user-select: none;
     }
-
-    /* ====== LOGIN ====== */
-    #telaLogin {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: var(--cor-degrade);
-      color: #fff;
-      text-align: center;
-    }
-
-    #telaLogin input {
-      width: 280px;
-      padding: 12px 15px;
-      margin: 10px 0;
-      border-radius: 10px;
-      border: none;
-      font-size: 16px;
-      outline: none;
-    }
-
-    #telaLogin button {
-      width: 300px;
-      padding: 12px;
-      background: #0ef;
-      border: none;
-      border-radius: 10px;
-      color: #1f293a;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 16px;
-      margin-top: 15px;
-      transition: background 0.3s ease;
-    }
-
-    #telaLogin button:hover {
-      background: #0cc;
-    }
-
-    /* ====== SISTEMA ====== */
-    #sistema {
-      display: none;
-    }
-
-    h1 {
+    h1, h2 {
       text-align: center;
       color: #fff8dc;
-      font-size: 22px;
       margin: 4px 0 20px;
     }
-
+    /* LOGIN */
+    #login-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #login-box {
+      background: rgba(255,255,255,0.3);
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      width: 320px;
+      color: #fff;
+    }
+    #login-box label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #login-box input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 10px;
+      border: 1px solid var(--cor-borda);
+      font-size: 16px;
+      outline: none;
+      background: #f2e4c9;
+      color: #333;
+    }
+    #login-box button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      background: #0ef;
+      border: none;
+      border-radius: 40px;
+      color: #1f293a;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #login-box button:hover {
+      background: #09c;
+    }
+    #login-footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #ddd;
+      font-size: 14px;
+      font-style: italic;
+      user-select: none;
+    }
+    /* SISTEMA */
+    #app-screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+    }
+    h1.system-title {
+      margin-top: 10px;
+      margin-bottom: 15px;
+      color: #fff8dc;
+      font-size: 22px;
+    }
     .tabs {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-bottom: 15px;
+      user-select: none;
     }
-
     .tabs button {
       background: var(--cor-bege-degrade);
       font-weight: bold;
@@ -99,20 +118,22 @@
       padding: 10px 20px;
       border-radius: 10px;
       cursor: pointer;
+      opacity: 0.6;
+      box-shadow: none;
+      transition: opacity 0.3s ease, box-shadow 0.3s ease;
+      filter: drop-shadow(0 0 0 transparent);
     }
-
     .tabs button.active {
-      outline: 2px solid #888;
+      opacity: 1;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      filter: drop-shadow(0 0 8px rgba(0,0,0,0.4));
     }
-
     .aba {
       display: none;
     }
-
     .aba.active {
       display: block;
     }
-
     .formulario {
       max-width: 500px;
       margin: 0 auto;
@@ -120,14 +141,15 @@
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      color: #333;
     }
-
     label {
       display: block;
       font-weight: bold;
       margin-top: 12px;
+      color: #000;
+      user-select: text;
     }
-
     input[type="text"],
     input[type="number"] {
       width: 92%;
@@ -137,14 +159,13 @@
       border: 1px solid var(--cor-borda);
       background: #f2e4c9 !important;
       margin-top: 5px;
+      color: #000;
     }
-
     .linha {
       display: flex;
       gap: 5px;
       align-items: center;
     }
-
     .linha button {
       width: 48px;
       height: 48px;
@@ -153,15 +174,14 @@
       border-radius: 10px;
       border: none;
       cursor: pointer;
+      user-select: none;
     }
-
     .quantidade-control {
       display: flex;
       gap: 5px;
       margin-top: 5px;
       align-items: center;
     }
-
     .quantidade-control button {
       width: 50px;
       font-size: 24px;
@@ -170,8 +190,8 @@
       border: none;
       background: var(--cor-bege-degrade);
       cursor: pointer;
+      user-select: none;
     }
-
     .btn-principal {
       width: 100%;
       padding: 12px;
@@ -182,15 +202,15 @@
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
+      user-select: none;
     }
-
     .carrinho {
       background: rgba(255,255,255,0.8);
       margin-top: 20px;
       padding: 10px;
       border-radius: 10px;
+      user-select: none;
     }
-
     .carrinho-item {
       background: #fdf6e3;
       padding: 8px;
@@ -200,54 +220,57 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .acoes button {
       margin-left: 5px;
       padding: 4px 8px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      user-select: none;
     }
-
     .acoes .editar {
       background: #f0c674;
     }
-
     .acoes .excluir {
       background: #f47c7c;
     }
-
     #leitor-camera, #leitor-camera-transferencia {
       display: none;
       margin-top: 10px;
       border-radius: 8px;
       overflow: hidden;
     }
-
-    /* Rodapé criado por */
-    footer {
+    /* Footer no app */
+    #app-footer {
       text-align: center;
-      color: #fff8dc;
-      margin-top: 40px;
+      margin-top: 30px;
+      color: #ddd;
       font-size: 14px;
       font-style: italic;
+      user-select: none;
     }
   </style>
 </head>
 <body>
 
   <!-- TELA LOGIN -->
-  <div id="telaLogin">
+  <div id="login-screen">
     <div class="logo-text">Cremer</div>
-    <input type="text" id="usuario" placeholder="Usuário / Cadastro" />
-    <input type="password" id="senha" placeholder="Senha" />
-    <button onclick="fazerLogin()">Entrar</button>
+    <div id="login-box">
+      <h2>Login</h2>
+      <label for="usuario">Usuário / Cadastro:</label>
+      <input type="text" id="usuario" placeholder="Almoxarifado" autocomplete="off" />
+      <label for="senha">Senha:</label>
+      <input type="password" id="senha" placeholder="123" autocomplete="off" />
+      <button onclick="fazerLogin()">Entrar</button>
+      <div id="login-footer">Criado por Kauã Mickael Bonamente</div>
+    </div>
   </div>
 
   <!-- SISTEMA -->
-  <div id="sistema">
+  <div id="app-screen">
     <div class="logo-text">Cremer</div>
-    <h1>ENTREGA DE MATERIAIS</h1>
+    <h1 class="system-title">ENTREGA DE MATERIAIS</h1>
 
     <div class="tabs">
       <button id="btn-uso" class="active" onclick="mostrarAba('uso')">Uso Consumo</button>
@@ -283,7 +306,7 @@
       </div>
     </div>
 
-    <!-- ABA TRANSFERENCIA -->
+    <!-- ABA TRANSFERÊNCIA -->
     <div id="aba-transferencia" class="aba">
       <div class="formulario">
         <label>Armazém de Origem:</label>
@@ -312,26 +335,25 @@
       </div>
     </div>
 
-    <footer>Criado por Kauã Mickael Bonamente</footer>
+    <div id="app-footer">Criado por Kauã Mickael Bonamente</div>
   </div>
 
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script>
-    // Login simples (sem segurança real)
+    // Login simples
     function fazerLogin() {
-      const usuario = document.getElementById("usuario").value.trim();
-      const senha = document.getElementById("senha").value.trim();
-
-      if (!usuario || !senha) {
-        alert("Preencha usuário e senha");
-        return;
+      const usuario = document.getElementById('usuario').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      if(usuario === 'Almoxarifado' && senha === '123') {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'flex';
+      } else {
+        alert('Usuário ou senha incorretos.');
       }
-
-      // Esconde login e mostra sistema
-      document.getElementById("telaLogin").style.display = "none";
-      document.getElementById("sistema").style.display = "block";
     }
 
-    // Mostrar abas
+    // Controle de abas
     function mostrarAba(aba) {
       document.querySelectorAll(".aba").forEach(e => e.classList.remove("active"));
       document.querySelectorAll(".tabs button").forEach(e => e.classList.remove("active"));
@@ -340,7 +362,7 @@
       fecharScanner();
     }
 
-    // Controlar quantidade com + e -
+    // Controle quantidade
     function alterarQtd(id, val) {
       const input = document.getElementById(id);
       let v = parseInt(input.value) || 1;
@@ -348,7 +370,7 @@
       input.value = v;
     }
 
-    // Adicionar item ao carrinho (uso ou transf)
+    // Adicionar item ao carrinho
     let carrinhoUso = [];
     let carrinhoTransf = [];
     let scanner = null;
@@ -371,10 +393,7 @@
       };
 
       const campos = Object.values(item);
-      if (campos.some(v => !v)) {
-        alert("Preencha todos os campos.");
-        return;
-      }
+      if (campos.some(v => !v)) return alert("Preencha todos os campos.");
 
       (tipo === "uso" ? carrinhoUso : carrinhoTransf).push(item);
       renderCarrinho(tipo);
@@ -395,7 +414,7 @@
         </div>`).join("");
     }
 
-    // Editar item do carrinho
+    // Editar item
     function editarItem(tipo, i) {
       const item = (tipo === "uso" ? carrinhoUso : carrinhoTransf)[i];
       Object.entries(item).forEach(([k, v]) => {
@@ -406,46 +425,51 @@
       renderCarrinho(tipo);
     }
 
-    // Excluir item do carrinho
+    // Excluir item
     function excluirItem(tipo, i) {
       (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
       renderCarrinho(tipo);
     }
 
-    // Finalizar entrega (gera arquivo Excel)
+    // Finalizar entrega/exportar Excel
     function finalizarEntrega(tipo) {
       const dados = tipo === "uso" ? carrinhoUso : carrinhoTransf;
-      if (dados.length === 0) {
-        alert("Carrinho vazio.");
-        return;
-      }
+      if (dados.length === 0) return alert("Carrinho vazio.");
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(dados);
       XLSX.utils.book_append_sheet(wb, ws, tipo);
       XLSX.writeFile(wb, tipo === "uso" ? "UsoConsumo.xlsx" : "Transferencia.xlsx");
-
       if (tipo === "uso") carrinhoUso = []; else carrinhoTransf = [];
       renderCarrinho(tipo);
     }
 
-    // Limpar campos após adicionar
+    // Limpar campos do formulário
     function limparCampos(tipo) {
-      const campos = tipo === "uso" ?
-        ["codigo", "quantidade"] :
-        ["codigoTransf", "quantidadeTransf"];
-      campos.forEach(id => document.getElementById(id).value = id.includes("quantidade") ? 1 : "");
+      if (tipo === "uso") {
+        ["transacao", "centro", "solicitante", "responsavel", "codigo", "quantidade"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = (id === "quantidade") ? 1 : "";
+        });
+      } else {
+        ["origem", "destino", "solicitanteTransf", "responsavelTransf", "codigoTransf", "quantidadeTransf"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = (id.includes("quantidade")) ? 1 : "";
+        });
+      }
     }
 
-    // Obter valor do input
+    // Pega valor do campo
     function getVal(id) {
       return document.getElementById(id)?.value.trim();
     }
 
-    // Abrir/fechar scanner QR code
+    // Scanner QR code toggle
     function toggleScanner(campo, divId) {
       const div = document.getElementById(divId);
-      if (div.style.display === "block") return fecharScanner();
-
+      if (div.style.display === "block") {
+        fecharScanner();
+        return;
+      }
       fecharScanner();
       div.style.display = "block";
       scanner = new Html5Qrcode(divId);
@@ -454,17 +478,25 @@
         scanner.start(camId, { fps: 10, qrbox: 250 }, msg => {
           document.getElementById(campo).value = msg;
           fecharScanner();
-        });
+        }).catch(err => console.log("Erro ao iniciar câmera:", err));
+      }).catch(err => {
+        alert("Câmera não encontrada: " + err);
+        fecharScanner();
       });
     }
-
-    // Fechar scanner
     function fecharScanner() {
-      document.querySelectorAll("#leitor-camera, #leitor-camera-transferencia").forEach(e => e.style.display = "none");
-      if (scanner) scanner.stop().then(() => scanner.clear());
-      scanner = null;
+      if (scanner) {
+        scanner.stop().then(() => {
+          scanner.clear();
+          scanner = null;
+          document.getElementById("leitor-camera").style.display = "none";
+          document.getElementById("leitor-camera-transferencia").style.display = "none";
+        });
+      } else {
+        document.getElementById("leitor-camera").style.display = "none";
+        document.getElementById("leitor-camera-transferencia").style.display = "none";
+      }
     }
   </script>
-
 </body>
 </html>
