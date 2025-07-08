@@ -259,7 +259,7 @@
     <div id="login-box">
       <h2>Login</h2>
       <label for="usuario">Usuário / Cadastro:</label>
-      <input type="text" id="usuario" placeholder="Almoxarifado" autocomplete="off" />
+      <input type="text" id="usuario" placeholder="Almoxarifado.Textil/279492" autocomplete="off" />
       <label for="senha">Senha:</label>
       <input type="password" id="senha" placeholder="123" autocomplete="off" />
       <button onclick="fazerLogin()">Entrar</button>
@@ -345,7 +345,7 @@
     function fazerLogin() {
       const usuario = document.getElementById('usuario').value.trim();
       const senha = document.getElementById('senha').value.trim();
-      if(usuario === 'Almoxarifado' && senha === '123') {
+      if(usuario === '279492' && senha === '123') {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'flex';
       } else {
