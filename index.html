@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login + Entrega de Materiais</title>
+  <title>Entrega de Materiais - Login</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -23,52 +23,56 @@
       padding: 20px;
     }
 
-    /* TELA DE LOGIN */
-    .login-container {
+    /* ====== LOGIN ====== */
+    #telaLogin {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       flex-direction: column;
-    }
-
-    .login-box {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: var(--cor-degrade);
+      color: #fff;
       text-align: center;
     }
 
-    .login-box h2 {
-      color: #fff;
+    #telaLogin img {
+      width: 180px;
       margin-bottom: 20px;
     }
 
-    .login-box input {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      width: 250px;
-      border-radius: 8px;
+    #telaLogin input {
+      width: 280px;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 10px;
       border: none;
       font-size: 16px;
+      outline: none;
     }
 
-    .login-box button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      border-radius: 8px;
+    #telaLogin button {
+      width: 300px;
+      padding: 12px;
+      background: #0ef;
       border: none;
-      background-color: #0ef;
-      color: #000;
+      border-radius: 10px;
+      color: #1f293a;
       font-weight: bold;
       cursor: pointer;
+      font-size: 16px;
+      margin-top: 15px;
+      transition: background 0.3s ease;
     }
 
-    .hidden { display: none; }
+    #telaLogin button:hover {
+      background: #0cc;
+    }
 
-    /* SEU SISTEMA */
+    /* ====== SISTEMA ====== */
+    #sistema {
+      display: none;
+    }
+
     .logo-text {
       font-size: 48px;
       font-weight: bold;
@@ -105,8 +109,13 @@
       outline: 2px solid #888;
     }
 
-    .aba { display: none; }
-    .aba.active { display: block; }
+    .aba {
+      display: none;
+    }
+
+    .aba.active {
+      display: block;
+    }
 
     .formulario {
       max-width: 500px;
@@ -204,8 +213,13 @@
       cursor: pointer;
     }
 
-    .acoes .editar { background: #f0c674; }
-    .acoes .excluir { background: #f47c7c; }
+    .acoes .editar {
+      background: #f0c674;
+    }
+
+    .acoes .excluir {
+      background: #f47c7c;
+    }
 
     #leitor-camera, #leitor-camera-transferencia {
       display: none;
@@ -213,22 +227,33 @@
       border-radius: 8px;
       overflow: hidden;
     }
+
+    /* Rodapé criado por */
+    footer {
+      text-align: center;
+      color: #fff8dc;
+      margin-top: 40px;
+      font-size: 14px;
+      font-style: italic;
+    }
+
   </style>
 </head>
 <body>
 
-  <!-- TELA DE LOGIN -->
-  <div class="login-container" id="telaLogin">
-    <div class="login-box">
-      <h2>Login</h2>
-      <input type="text" id="usuario" placeholder="Usuário" />
-      <input type="password" id="senha" placeholder="Senha" />
-      <button onclick="fazerLogin()">Entrar</button>
-    </div>
+  <!-- TELA LOGIN -->
+  <div id="telaLogin">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cremer_Logo.png" alt="Logo Cremer" />
+    <input type="text" id="usuario" placeholder="Usuário / Cadastro" />
+    <input type="password" id="senha" placeholder="Senha" />
+    <button onclick="fazerLogin()">Entrar</button>
   </div>
 
-  <!-- SISTEMA PRINCIPAL -->
-  <div id="sistema" class="hidden">
+  <!-- SISTEMA -->
+  <div id="sistema">
+    <div style="text-align:center; margin-bottom:10px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cremer_Logo.png" alt="Logo Cremer" style="width:200px;" />
+    </div>
     <div class="logo-text">Cremer</div>
     <h1>ENTREGA DE MATERIAIS</h1>
 
@@ -237,28 +262,27 @@
       <button id="btn-transferencia" onclick="mostrarAba('transferencia')">Transferência</button>
     </div>
 
-    <!-- conteúdo mantido igual ao que você mandou -->
     <!-- ABA USO -->
     <div id="aba-uso" class="aba active">
       <div class="formulario">
         <label>Transação:</label>
-        <input type="text" id="transacao" maxlength="3">
+        <input type="text" id="transacao" maxlength="3" />
         <label>Centro de Custo:</label>
-        <input type="text" id="centro" maxlength="6">
+        <input type="text" id="centro" maxlength="6" />
         <label>Solicitante:</label>
-        <input type="text" id="solicitante" maxlength="6">
+        <input type="text" id="solicitante" maxlength="6" />
         <label>Responsável pelo Atendimento:</label>
-        <input type="text" id="responsavel" maxlength="6">
+        <input type="text" id="responsavel" maxlength="6" />
         <label>Código do Material:</label>
         <div class="linha">
-          <input type="text" id="codigo" maxlength="11">
+          <input type="text" id="codigo" maxlength="11" />
           <button onclick="toggleScanner('codigo', 'leitor-camera')">📷</button>
         </div>
         <div id="leitor-camera"></div>
         <label>Quantidade:</label>
         <div class="quantidade-control">
           <button onclick="alterarQtd('quantidade', -1)">−</button>
-          <input type="number" id="quantidade" value="1" min="1">
+          <input type="number" id="quantidade" value="1" min="1" />
           <button onclick="alterarQtd('quantidade', 1)">+</button>
         </div>
         <button class="btn-principal" onclick="adicionarItem('uso')">Adicionar ao Carrinho</button>
@@ -271,23 +295,23 @@
     <div id="aba-transferencia" class="aba">
       <div class="formulario">
         <label>Armazém de Origem:</label>
-        <input type="text" id="origem">
+        <input type="text" id="origem" />
         <label>Armazém de Destino:</label>
-        <input type="text" id="destino">
+        <input type="text" id="destino" />
         <label>Solicitante:</label>
-        <input type="text" id="solicitanteTransf">
+        <input type="text" id="solicitanteTransf" />
         <label>Responsável pelo Atendimento:</label>
-        <input type="text" id="responsavelTransf">
+        <input type="text" id="responsavelTransf" />
         <label>Código do Material:</label>
         <div class="linha">
-          <input type="text" id="codigoTransf">
+          <input type="text" id="codigoTransf" />
           <button onclick="toggleScanner('codigoTransf', 'leitor-camera-transferencia')">📷</button>
         </div>
         <div id="leitor-camera-transferencia"></div>
         <label>Quantidade:</label>
         <div class="quantidade-control">
           <button onclick="alterarQtd('quantidadeTransf', -1)">−</button>
-          <input type="number" id="quantidadeTransf" value="1" min="1">
+          <input type="number" id="quantidadeTransf" value="1" min="1" />
           <button onclick="alterarQtd('quantidadeTransf', 1)">+</button>
         </div>
         <button class="btn-principal" onclick="adicionarItem('transf')">Adicionar ao Carrinho</button>
@@ -295,132 +319,144 @@
         <button class="btn-principal" onclick="finalizarEntrega('transf')">Finalizar Transferência</button>
       </div>
     </div>
+
+    <footer>Criado por Kauã Mickael Bonamente</footer>
   </div>
 
-<script>
-  // ===== LOGIN SIMPLES =====
-  function fazerLogin() {
-    const user = document.getElementById("usuario").value.trim();
-    const pass = document.getElementById("senha").value.trim();
-    if (user === "kaua" && pass === "123") {
+  <script>
+    // Login simples, sem segurança real
+    function fazerLogin() {
+      const usuario = document.getElementById("usuario").value.trim();
+      const senha = document.getElementById("senha").value.trim();
+
+      if (!usuario || !senha) {
+        alert("Preencha usuário e senha");
+        return;
+      }
+
+      // Qualquer usuário/senha válido deixa entrar (sem segurança)
       document.getElementById("telaLogin").style.display = "none";
-      document.getElementById("sistema").classList.remove("hidden");
-    } else {
-      alert("Usuário ou senha incorretos.");
+      document.getElementById("sistema").style.display = "block";
     }
-  }
 
-  // ===== CÓDIGOS DO SISTEMA (MANTIDOS) =====
-  let carrinhoUso = [], carrinhoTransf = [], scanner = null;
+    // Funções do sistema principal (idênticas ao seu código original)
 
-  function mostrarAba(aba) {
-    document.querySelectorAll(".aba").forEach(e => e.classList.remove("active"));
-    document.querySelectorAll(".tabs button").forEach(e => e.classList.remove("active"));
-    document.getElementById("aba-" + aba).classList.add("active");
-    document.getElementById("btn-" + aba).classList.add("active");
-    fecharScanner();
-  }
+    let carrinhoUso = [];
+    let carrinhoTransf = [];
+    let scanner = null;
 
-  function alterarQtd(id, val) {
-    const input = document.getElementById(id);
-    let v = parseInt(input.value) || 1;
-    v = Math.max(1, v + val);
-    input.value = v;
-  }
+    function mostrarAba(aba) {
+      document.querySelectorAll(".aba").forEach(e => e.classList.remove("active"));
+      document.querySelectorAll(".tabs button").forEach(e => e.classList.remove("active"));
+      document.getElementById("aba-" + aba).classList.add("active");
+      document.getElementById("btn-" + aba).classList.add("active");
+      fecharScanner();
+    }
 
-  function adicionarItem(tipo) {
-    const item = tipo === "uso" ? {
-      transacao: getVal("transacao"),
-      centro: getVal("centro"),
-      solicitante: getVal("solicitante"),
-      responsavel: getVal("responsavel"),
-      codigo: getVal("codigo"),
-      quantidade: getVal("quantidade")
-    } : {
-      origem: getVal("origem"),
-      destino: getVal("destino"),
-      solicitante: getVal("solicitanteTransf"),
-      responsavel: getVal("responsavelTransf"),
-      codigo: getVal("codigoTransf"),
-      quantidade: getVal("quantidadeTransf")
-    };
+    function alterarQtd(id, val) {
+      const input = document.getElementById(id);
+      let v = parseInt(input.value) || 1;
+      v = Math.max(1, v + val);
+      input.value = v;
+    }
 
-    const campos = Object.values(item);
-    if (campos.some(v => !v)) return alert("Preencha todos os campos.");
+    function adicionarItem(tipo) {
+      const item = tipo === "uso" ? {
+        transacao: getVal("transacao"),
+        centro: getVal("centro"),
+        solicitante: getVal("solicitante"),
+        responsavel: getVal("responsavel"),
+        codigo: getVal("codigo"),
+        quantidade: getVal("quantidade")
+      } : {
+        origem: getVal("origem"),
+        destino: getVal("destino"),
+        solicitante: getVal("solicitanteTransf"),
+        responsavel: getVal("responsavelTransf"),
+        codigo: getVal("codigoTransf"),
+        quantidade: getVal("quantidadeTransf")
+      };
 
-    (tipo === "uso" ? carrinhoUso : carrinhoTransf).push(item);
-    renderCarrinho(tipo);
-    limparCampos(tipo);
-  }
+      const campos = Object.values(item);
+      if (campos.some(v => !v)) return alert("Preencha todos os campos.");
 
-  function renderCarrinho(tipo) {
-    const div = document.getElementById(tipo === "uso" ? "carrinhoUso" : "carrinhoTransf");
-    const carrinho = tipo === "uso" ? carrinhoUso : carrinhoTransf;
-    div.innerHTML = "<strong>Itens:</strong>" + carrinho.map((item, i) =>
-      `<div class="carrinho-item">
-        <span>${item.codigo} – ${item.quantidade}</span>
-        <div class="acoes">
-          <button class="editar" onclick="editarItem('${tipo}', ${i})">Editar</button>
-          <button class="excluir" onclick="excluirItem('${tipo}', ${i})">Excluir</button>
-        </div>
-      </div>`).join("");
-  }
+      (tipo === "uso" ? carrinhoUso : carrinhoTransf).push(item);
+      renderCarrinho(tipo);
+      limparCampos(tipo);
+    }
 
-  function editarItem(tipo, i) {
-    const item = (tipo === "uso" ? carrinhoUso : carrinhoTransf)[i];
-    Object.entries(item).forEach(([k, v]) => {
-      const campo = document.getElementById(k + (tipo === "transf" && k !== "codigo" ? "Transf" : ""));
-      if (campo) campo.value = v;
-    });
-    (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
-    renderCarrinho(tipo);
-  }
+    function renderCarrinho(tipo) {
+      const div = document.getElementById(tipo === "uso" ? "carrinhoUso" : "carrinhoTransf");
+      const carrinho = tipo === "uso" ? carrinhoUso : carrinhoTransf;
+      div.innerHTML = "<strong>Itens:</strong>" + carrinho.map((item, i) =>
+        `<div class="carrinho-item">
+          <span>${item.codigo} – ${item.quantidade}</span>
+          <div class="acoes">
+            <button class="editar" onclick="editarItem('${tipo}', ${i})">Editar</button>
+            <button class="excluir" onclick="excluirItem('${tipo}', ${i})">Excluir</button>
+          </div>
+        </div>`).join("");
+    }
 
-  function excluirItem(tipo, i) {
-    (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
-    renderCarrinho(tipo);
-  }
-
-  function finalizarEntrega(tipo) {
-    const dados = tipo === "uso" ? carrinhoUso : carrinhoTransf;
-    if (dados.length === 0) return alert("Carrinho vazio.");
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(dados);
-    XLSX.utils.book_append_sheet(wb, ws, tipo);
-    XLSX.writeFile(wb, tipo === "uso" ? "UsoConsumo.xlsx" : "Transferencia.xlsx");
-    if (tipo === "uso") carrinhoUso = []; else carrinhoTransf = [];
-    renderCarrinho(tipo);
-  }
-
-  function limparCampos(tipo) {
-    const campos = tipo === "uso" ? ["codigo", "quantidade"] : ["codigoTransf", "quantidadeTransf"];
-    campos.forEach(id => document.getElementById(id).value = id.includes("quantidade") ? 1 : "");
-  }
-
-  function getVal(id) {
-    return document.getElementById(id)?.value.trim();
-  }
-
-  function toggleScanner(campo, divId) {
-    const div = document.getElementById(divId);
-    if (div.style.display === "block") return fecharScanner();
-    fecharScanner();
-    div.style.display = "block";
-    scanner = new Html5Qrcode(divId);
-    Html5Qrcode.getCameras().then(cameras => {
-      const camId = cameras.find(c => c.label.toLowerCase().includes("back"))?.id || cameras[0].id;
-      scanner.start(camId, { fps: 10, qrbox: 250 }, msg => {
-        document.getElementById(campo).value = msg;
-        fecharScanner();
+    function editarItem(tipo, i) {
+      const item = (tipo === "uso" ? carrinhoUso : carrinhoTransf)[i];
+      Object.entries(item).forEach(([k, v]) => {
+        const campo = document.getElementById(k + (tipo === "transf" && k !== "codigo" ? "Transf" : ""));
+        if (campo) campo.value = v;
       });
-    });
-  }
+      (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
+      renderCarrinho(tipo);
+    }
 
-  function fecharScanner() {
-    document.querySelectorAll("#leitor-camera, #leitor-camera-transferencia").forEach(e => e.style.display = "none");
-    if (scanner) scanner.stop().then(() => scanner.clear());
-    scanner = null;
-  }
-</script>
+    function excluirItem(tipo, i) {
+      (tipo === "uso" ? carrinhoUso : carrinhoTransf).splice(i, 1);
+      renderCarrinho(tipo);
+    }
+
+    function finalizarEntrega(tipo) {
+      const dados = tipo === "uso" ? carrinhoUso : carrinhoTransf;
+      if (dados.length === 0) return alert("Carrinho vazio.");
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(dados);
+      XLSX.utils.book_append_sheet(wb, ws, tipo);
+      XLSX.writeFile(wb, tipo === "uso" ? "UsoConsumo.xlsx" : "Transferencia.xlsx");
+      if (tipo === "uso") carrinhoUso = []; else carrinhoTransf = [];
+      renderCarrinho(tipo);
+    }
+
+    function limparCampos(tipo) {
+      const campos = tipo === "uso" ?
+        ["codigo", "quantidade"] :
+        ["codigoTransf", "quantidadeTransf"];
+      campos.forEach(id => document.getElementById(id).value = id.includes("quantidade") ? 1 : "");
+    }
+
+    function getVal(id) {
+      return document.getElementById(id)?.value.trim();
+    }
+
+    function toggleScanner(campo, divId) {
+      const div = document.getElementById(divId);
+      if (div.style.display === "block") return fecharScanner();
+
+      fecharScanner();
+      div.style.display = "block";
+      scanner = new Html5Qrcode(divId);
+      Html5Qrcode.getCameras().then(cameras => {
+        const camId = cameras.find(c => c.label.toLowerCase().includes("back"))?.id || cameras[0].id;
+        scanner.start(camId, { fps: 10, qrbox: 250 }, msg => {
+          document.getElementById(campo).value = msg;
+          fecharScanner();
+        });
+      });
+    }
+
+    function fecharScanner() {
+      document.querySelectorAll("#leitor-camera, #leitor-camera-transferencia").forEach(e => e.style.display = "none");
+      if (scanner) scanner.stop().then(() => scanner.clear());
+      scanner = null;
+    }
+  </script>
+
 </body>
 </html>
