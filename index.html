@@ -309,17 +309,11 @@
       </div>
     </div>
 
-    <!-- ABA TRANSFERÊNCIA -->
+   <!-- ABA TRANSFERÊNCIA -->
     <div id="aba-transferencia" class="aba">
       <div class="formulario">
-        <label>Armazém de Origem:</label>
-        <input type="text" id="origem" />
-        <label>Armazém de Destino:</label>
-        <input type="text" id="destino" />
-        <label>Solicitante:</label>
-        <input type="text" id="solicitanteTransf" />
-        <label>Responsável pelo Atendimento:</label>
-        <input type="text" id="responsavelTransf" />
+        <label>Usuario:</label>
+        <input type="text" id="usuarioTransf" />
         <label>Código do Material:</label>
         <div class="linha">
           <input type="text" id="codigoTransf" />
@@ -402,10 +396,7 @@
         codigo: getVal("codigo"),
         quantidade: getVal("quantidade")
       } : tipo === "transf" ? {
-        origem: getVal("origem"),
-        destino: getVal("destino"),
-        solicitante: getVal("solicitanteTransf"),
-        responsavel: getVal("responsavelTransf"),
+        solicitante: getVal("usuarioTransf"),
         codigo: getVal("codigoTransf"),
         quantidade: getVal("quantidadeTransf")
       } : null;
@@ -421,27 +412,39 @@
     }
 
     // Renderizar carrinho
-    function renderCarrinho(tipo) {
-      const div = document.getElementById(tipo === "uso" ? "carrinhoUso" : tipo === "transf" ? "carrinhoTransf" : "carrinhoConf");
-      const carrinho = tipo === "uso" ? carrinhoUso : tipo === "transf" ? carrinhoTransf : carrinhoConf;
-      div.innerHTML = "<strong>Itens:</strong>" + carrinho.map((item, i) =>
-        tipo === "conf" ?
-          `<div class="carrinho-item">
-            <span>${item.codigo} – ${item.quantidade}</span>
-            <div class="acoes">
-              <button class="excluir" onclick="excluirItem('conf', ${i})">Excluir</button>
-            </div>
-          </div>`
-        :
-          `<div class="carrinho-item">
-            <span>${item.codigo} – ${item.quantidade}</span>
-            <div class="acoes">
-              <button class="editar" onclick="editarItem('${tipo}', ${i})">Editar</button>
-              <button class="excluir" onclick="excluirItem('${tipo}', ${i})">Excluir</button>
-            </div>
-          </div>`
-      ).join("");
-    }
+function renderCarrinho(tipo) {
+  const div = document.getElementById(
+    tipo === "uso" ? "carrinhoUso" : tipo === "transf" ? "carrinhoTransf" : "carrinhoConf"
+  );
+  const carrinho = tipo === "uso" ? carrinhoUso : tipo === "transf" ? carrinhoTransf : carrinhoConf;
+
+  div.innerHTML = "<strong>Itens:</strong>" + carrinho.map((item, i) =>
+    tipo === "conf" ?
+      `<div class="carrinho-item">
+        <span>${item.codigo} – ${item.quantidade}</span>
+        <div class="acoes">
+          <button class="excluir" onclick="excluirItem('conf', ${i})">Excluir</button>
+        </div>
+      </div>`
+    : tipo === "transf" ?
+      `<div class="carrinho-item">
+        <span><b>Usuário:</b> ${item.solicitante} | <b>Código:</b> ${item.codigo} – <b>Qtd:</b> ${item.quantidade}</span>
+        <div class="acoes">
+          <button class="editar" onclick="editarItem('${tipo}', ${i})">Editar</button>
+          <button class="excluir" onclick="excluirItem('${tipo}', ${i})">Excluir</button>
+        </div>
+      </div>`
+    :
+      `<div class="carrinho-item">
+        <span><b>Solicitante:</b> ${item.solicitante} | <b>Código:</b> ${item.codigo} – <b>Qtd:</b> ${item.quantidade}</span>
+        <div class="acoes">
+          <button class="editar" onclick="editarItem('${tipo}', ${i})">Editar</button>
+          <button class="excluir" onclick="excluirItem('${tipo}', ${i})">Excluir</button>
+        </div>
+      </div>`
+  ).join("");
+}
+
 
     // Editar item (não aplicável para conf)
     function editarItem(tipo, i) {
@@ -591,3 +594,4 @@
   </script>
 </body>
 </html>
+
