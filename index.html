@@ -236,7 +236,7 @@
     .acoes .excluir {
       background: #f47c7c;
     }
-    #leitor-camera, #leitor-camera-transferencia, #leitor-camera-conf {
+    #leitor-camera-end, #leitor-camera-transferencia, #leitor-camera-conf {
       display: none;
       margin-top: 10px;
       border-radius: 8px;
@@ -566,20 +566,20 @@ function getVal(id) {
       });
     }
     function fecharScanner() {
-      if (scanner) {
-        scanner.stop().then(() => {
-          scanner.clear();
-          scanner = null;
-          document.getElementById("leitor-camera").style.display = "none";
-          document.getElementById("leitor-camera-transferencia").style.display = "none";
-          document.getElementById("leitor-camera-conf").style.display = "none";
-        });
-      } else {
-        document.getElementById("leitor-camera").style.display = "none";
-        document.getElementById("leitor-camera-transferencia").style.display = "none";
-        document.getElementById("leitor-camera-conf").style.display = "none";
-      }
-    }
+  if (scanner) {
+    scanner.stop().then(() => {
+      scanner.clear();
+      scanner = null;
+      document.getElementById("leitor-camera-end").style.display = "none";
+      document.getElementById("leitor-camera-transferencia").style.display = "none";
+      document.getElementById("leitor-camera-conf").style.display = "none";
+    });
+  } else {
+    document.getElementById("leitor-camera-end").style.display = "none";
+    document.getElementById("leitor-camera-transferencia").style.display = "none";
+    document.getElementById("leitor-camera-conf").style.display = "none";
+  }
+}
 
     // FUNÇÕES ESPECIAIS PARA ABA CONFERÊNCIA CARREGAMENTO TERCEIRO
     const inputCodigoConf = document.getElementById("codigoConf");
